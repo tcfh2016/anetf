@@ -1,15 +1,14 @@
-import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
+import os
 
-target_url = 'https://www.csindex.com.cn/#/indices/family/list'
+opts = webdriver.FirefoxOptions()
+opts.add_argument("--headless")
 
-def scrap_page(url):
-    response = requests.get(url, verify=False)
+driver = webdriver.Firefox(options=opts)
+driver.get('https://www.csindex.com.cn/#/indices/family/list')
 
-    if response.status_code != 200:
-        return f'status failed with {response.status_code}'
-    else:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        print(soup)
+export_button = driver.find_elements(By.CLASS_NAME, 'ivu-btn ivu-btn-primary')
 
-scrap_page(target_url)
+print(export_button.text)
