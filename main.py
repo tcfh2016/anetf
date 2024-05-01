@@ -20,7 +20,7 @@ index_value_name_funddb_df = ak.index_value_name_funddb()
 index_value_name_funddb_df.to_csv('index_value.csv')
 print(index_value_name_funddb_df)
 
-# 获取所有国证指数，共1269只，国证指数的编码不同，包含了估值信息。
+# 获取所有国证指数（深交所指数机构），共1269只，包含了估值信息。
 index_all_cni_df = ak.index_all_cni()
 index_all_cni_df.to_csv('index_all.csv')
 print(index_all_cni_df)
