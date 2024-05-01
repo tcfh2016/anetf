@@ -15,14 +15,17 @@ print(fund_etf_spot_em_df)
 #    except Exception as e:
 #        print('failed with: '+ str(e))
 
+# 韭圈儿的指数估值，包含全球的主要指数，包含了估值信息，共275只
 index_value_name_funddb_df = ak.index_value_name_funddb()
 index_value_name_funddb_df.to_csv('index_value.csv')
 print(index_value_name_funddb_df)
 
+# 获取所有国证指数，共1269只，国证指数的编码不同，包含了估值信息。
 index_all_cni_df = ak.index_all_cni()
 index_all_cni_df.to_csv('index_all.csv')
 print(index_all_cni_df)
 
+# 获取所有的指数信息，719只指数，不包含估值
 index_stock_info_df = ak.index_stock_info()
 index_stock_info_df.to_csv('index_stock.csv')
 print(index_stock_info_df)
