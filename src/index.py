@@ -17,17 +17,17 @@ jk_df = ak.index_stock_info().astype({'index_code':str})
 
 
 def find_index_id(name) -> tuple:
-    # 先从韭圈儿找
+    # 先从韭圈儿找，指数代码带后缀，如000994.CSI，399102.SZ，HSTECH.HI
     for i in range(len(jq_df)):
         if name.find(jq_df['指数名称'][i]) != -1:
             return (jq_df['指数名称'][i], jq_df['指数代码'][i])
 
-    # 再从国证指数里找
+    # 再从国证指数里找，不带后缀，如399606，980009，CN2312
     for i in range(len(gz_df)):
         if name.find(gz_df['指数简称'][i]) != -1:
             return (gz_df['指数简称'][i], gz_df['指数代码'][i])
 
-    # 最后从聚宽指数里找
+    # 最后从聚宽指数里找，不带后缀，如000001，399335
     for i in range(len(jk_df)):
         if name.find(jk_df['display_name'][i]) != -1:
             return (jk_df['display_name'][i], jk_df['index_code'][i])
