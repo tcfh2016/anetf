@@ -1,3 +1,9 @@
+# -*- coding:utf-8 -*-
+"""
+Date: 2024-05-01
+Desc: 获取ETF对应的指数
+"""
+
 import numpy as np
 import pandas as pd
 import akshare as ak

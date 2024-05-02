@@ -1,3 +1,9 @@
+# -*- coding:utf-8 -*-
+"""
+Date: 2024-05-02
+Desc: 更新ETF对应的指数的市盈率
+"""
+
 import os
 import pandas as pd
 import akshare as ak

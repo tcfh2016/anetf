@@ -1,3 +1,9 @@
+# -*- coding:utf-8 -*-
+"""
+Date: 2024-05-01
+Desc: 获取ETF列表
+"""
+
 import requests
 import pandas as pd
 
