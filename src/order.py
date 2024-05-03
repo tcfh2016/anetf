@@ -19,7 +19,7 @@ def calc_percentile(arr):
 def order():
     # 由于多只ETF跟踪相同指数，所以先进行去重操作，只保留成交量最高的ETF
     df = pd.read_csv(index_file_path, usecols=['name', 'code', 'tag', 'avgamount', 'index_name', 'index_id'])
-    drop_duplicate_df = df.sort_values(by=['avgamount']).drop_duplicates(subset=['index_id'], keep='first')
+    drop_duplicate_df = df.sort_values(by=['avgamount']).drop_duplicates(subset=['index_id'], keep='last')
     print('ETF number: {}, drop to {} after remove duplicated ETF.'.format(len(df), len(drop_duplicate_df)))
     
 
@@ -35,18 +35,19 @@ def order():
         else:
             pe_percentile.append(np.nan)
 
+    drop_duplicate_df.columns = ['ETF名称', 'ETF代码', '标签', '平均成交额', '指数名称', '指数代码']
     drop_duplicate_df['市盈率'] = pe
     drop_duplicate_df['市盈率百分位'] = pe_percentile
 
     
     # 将ETF分割为“宽基”和“非宽基”两类
-    broad_etf = drop_duplicate_df[drop_duplicate_df['tag'].str.find('宽基') != -1]
+    broad_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('宽基') != -1]
     broad_etf = broad_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
     broad_etf.to_csv('etf_broad_sorted.csv')
     print(broad_etf)
 
-    other_etf = drop_duplicate_df[drop_duplicate_df['tag'].str.find('宽基') == -1]
-    other_etf = other_etf.sort_values(by=['市盈率百分位', '市盈率']).reset_index(drop=True)
+    other_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('宽基') == -1]
+    other_etf = other_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
     other_etf.to_csv('etf_other_sorted.csv')
     print(other_etf)
 
