@@ -5,14 +5,17 @@ Date: 2024-05-03
 Desc: 邮件报告
 """
 
+import os
 import smtplib
 import pandas as pd
 import datetime as dt
 from email.message import EmailMessage
 
-
 class HtmlReporter(object):
-    def __init__(self, date):
+    def __init__(self, server, port, authcode, date):
+        self._server = server
+        self._port = port
+        self._authcode = authcode
         self._date = date   
         self._head = '''
         <!DOCTYPE html>
@@ -140,18 +143,22 @@ class HtmlReporter(object):
         """
 
         return etf_table
-    
-    def send_email(self, sender, receiver):
+
+    def send_email(self, sender):
         msg = EmailMessage()
 
         # 填充邮件头部
         msg['Subject'] = 'ETF海选列表 - ' + str(self._date)
         msg['From'] = sender
-        msg['To'] = receiver
+        msg['To'] = ['lianbch@163.com']
 
-        etfs_broad = pd.read_csv('etf_broad_sorted.csv', usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
-        etfs_other = pd.read_csv('etf_other_sorted.csv', usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
-        
+        etfs_broad = pd.read_csv(
+            os.path.join(os.getcwd(), 'mail', 'etf_broad_sorted.csv'), 
+            usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
+        etfs_other = pd.read_csv(
+            os.path.join(os.getcwd(), 'mail', 'etf_other_sorted.csv'), 
+            usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
+
         # 填充邮件正文
         html = self._head \
                + self.construct_ETF_list(etfs_broad, '宽基') \
@@ -161,16 +168,15 @@ class HtmlReporter(object):
         
         # 发送邮件
         try:
-            mail_server = smtplib.SMTP_SSL('xxx',port=xxx)
-            mail_server.login(sender, 'xxx')
+            mail_server = smtplib.SMTP_SSL(self._server, port=self._port)
+            mail_server.login(sender, self._authcode)
             mail_server.send_message(msg)
         except smtplib.SMTPException as ex:
             print("Error: send failure = ", ex)
 
-
 if __name__ == '__main__':
     date = dt.date.today()-dt.timedelta(days=1)
-    reporter = HtmlReporter(date)
+    reporter = HtmlReporter('xxx', 465, 'xxx', date)
     sender = 'xxx'
-    receiver = ['xxx']
-    reporter.send_email(sender, receiver)  
+    receiver = ['lianbch@163.com']
+    reporter.send_email(sender) 

@@ -4,9 +4,12 @@ Date: 2024-05-01
 Desc: 获取ETF列表
 """
 
+import os
 import requests
 import pandas as pd
+from pathlib import Path
 
+tmp_path = os.path.join(Path(os.getcwd()).parent, 'tmp')
 
 def etf_info() -> pd.DataFrame:
     rows = info_rows()
@@ -22,7 +25,7 @@ def etf_info() -> pd.DataFrame:
     #组合宝数据处理
     df = pd.DataFrame(rows)
     df = df[(df['avgamount'] > 1000) & (df['name'].str.find('债') == -1)].reset_index(drop=True)
-    df.to_csv('etf.csv')
+    df.to_csv(os.path.join(tmp_path, 'etf.csv'))
     return df
 
 

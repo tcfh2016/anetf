@@ -4,10 +4,14 @@ Date: 2024-05-01
 Desc: 获取ETF对应的指数
 """
 
+import os
 import numpy as np
 import pandas as pd
 import akshare as ak
 import etf
+from pathlib import Path
+
+tmp_path = os.path.join(Path(os.getcwd()).parent, 'tmp')
 
 #,指数名称,最新PE,PE分位,最新PB,PB分位,股息率,股息率分位,指数代码,指数开始时间,更新时间
 #0,道琼斯美国石油开发与生产,8.29,0.77,2.72,82.61,3.88,81.96,DJSOEP.GI,2013-03-26,2024-04-30
@@ -55,7 +59,7 @@ def index():
     etfs['index_name'] = names
     etfs['index_id'] = ids
     etfs = etfs[pd.notnull(etfs['index_id'])].reset_index(drop=True)
-    etfs.to_csv('index.csv')
+    etfs.to_csv(os.path.join(tmp_path, 'index.csv'))
     print(etfs)
 
 

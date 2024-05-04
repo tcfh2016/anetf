@@ -13,7 +13,8 @@ import index
 
 gz_df = ak.index_all_cni().set_index('指数代码')
 db_path = os.path.join(Path(os.getcwd()).parent, 'db')
-index_file_path = os.path.join(os.getcwd(), 'index.csv')
+tmp_path = os.path.join(Path(os.getcwd()).parent, 'tmp')
+index_file_path = os.path.join(tmp_path, 'index.csv')
 
 
 class Pe(object):

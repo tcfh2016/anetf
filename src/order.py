@@ -9,7 +9,8 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
-index_file_path = os.path.join(os.getcwd(), 'index.csv')
+tmp_path = os.path.join(Path(os.getcwd()).parent, 'tmp')
+index_file_path = os.path.join(tmp_path, 'index.csv')
 db_path = os.path.join(Path(os.getcwd()).parent, 'db')
 
 def calc_percentile(arr):
@@ -43,12 +44,12 @@ def order():
     # 将ETF分割为“宽基”和“非宽基”两类
     broad_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('宽基') != -1]
     broad_etf = broad_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
-    broad_etf.to_csv('etf_broad_sorted.csv')
+    broad_etf.to_csv(os.path.join(tmp_path, 'etf_broad_sorted.csv'))
     print(broad_etf)
 
     other_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('宽基') == -1]
     other_etf = other_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
-    other_etf.to_csv('etf_other_sorted.csv')
+    other_etf.to_csv(os.path.join(tmp_path, 'etf_other_sorted.csv'))
     print(other_etf)
 
 
