@@ -30,10 +30,16 @@ class Pe(object):
             if self._rewrite:
                 new_df.to_csv(db_file)
             else:
-                if old_df.index[-1] != new_df.index[-1]:
-                    diff = new_df[old_df.index[-1]:]
-                    print(diff)
-                    pd.concat([old_df, diff]).to_csv(db_file)
+                # pe数据无更新
+                if old_df.index[-1] == new_df.index[-1]:
+                    return
+                if len(new_df) > 1:
+                    diff = new_df[old_df.index[-1]:][1:]
+                else:
+                    diff = new_df
+
+                print(diff)
+                pd.concat([old_df, diff]).to_csv(db_file)
         except Exception as e:
             print('Store pe for {} failed becuse of {}'.format(index_id, str(e)))
 
