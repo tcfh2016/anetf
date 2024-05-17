@@ -9,7 +9,6 @@ import pandas as pd
 import akshare as ak
 from pathlib import Path
 
-import index
 
 gz_df = ak.index_all_cni().set_index('指数代码')
 db_path = os.path.join(Path(os.getcwd()).parent, 'db')
