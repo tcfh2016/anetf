@@ -6,24 +6,62 @@ Desc: 更新ETF对应的指数的市盈率
 
 import os
 import pandas as pd
+import numpy as np
 import akshare as ak
-from pathlib import Path
-
 
 gz_df = ak.index_all_cni().set_index('指数代码')
-db_path = os.path.join(Path(os.getcwd()).parent, 'db')
-tmp_path = os.path.join(Path(os.getcwd()).parent, 'tmp')
-index_file_path = os.path.join(tmp_path, 'index.csv')
 
+def calc_percentile(arr):
+    lower = arr[arr < arr.iloc[-1]]
+    return(lower.shape[0] / arr.shape[0])
 
 class Pe(object):
-    def __init__(self):
+    def __init__(self, work_path):
         df = ak.stock_zh_a_hist(symbol='000001', period='daily', start_date='20240301', adjust="")
         self._latest_trade_day = str(df['日期'].iloc[-1])
         self._rewrite = False
+        
+        self._db_path = os.path.join(work_path, 'db')
+        self._tmp_path = os.path.join(work_path, 'tmp')  
+        self._index_file_path = os.path.join(work_path, 'tmp', 'index.csv')
+        #print('db path:{}, index:{}'.format(self._db_path, self._index_file_path))
+
+    def order(self):
+        # 由于多只ETF跟踪相同指数，所以先进行去重操作，只保留成交量最高的ETF
+        df = pd.read_csv(self._index_file_path, usecols=['name', 'code', 'tag', 'avgamount', 'index_name', 'index_id'])
+        drop_duplicate_df = df.sort_values(by=['avgamount']).drop_duplicates(subset=['index_id'], keep='last')
+        print('ETF number: {}, drop to {} after remove duplicated ETF.'.format(len(df), len(drop_duplicate_df)))        
+
+        # 填充ETF的最新市盈率，以及市盈率百分位（有至少500个交易日的数据）
+        pe, pe_percentile = [], []
+        for i in range(len(drop_duplicate_df)):
+            index_id = drop_duplicate_df['index_id'].iloc[i].split('.')[0].upper()
+            etf_pe = pd.read_csv(os.path.join(self._db_path, index_id + '.csv'))
+
+            pe.append(etf_pe['市盈率'].iloc[-1])
+            if len(etf_pe) > 500:
+                pe_percentile.append(calc_percentile(etf_pe['市盈率']))
+            else:
+                pe_percentile.append(np.nan)
+
+        drop_duplicate_df.columns = ['ETF名称', 'ETF代码', '标签', '平均成交额', '指数名称', '指数代码']
+        drop_duplicate_df['市盈率'] = pe
+        drop_duplicate_df['市盈率百分位'] = pe_percentile
+
+        
+        # 将ETF分割为“宽基”和“非宽基”两类
+        broad_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('宽基') != -1]
+        broad_etf = broad_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
+        broad_etf.to_csv(os.path.join(self._tmp_path, 'etf_broad_sorted.csv'))
+        print(broad_etf)
+
+        other_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('宽基') == -1]
+        other_etf = other_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
+        other_etf.to_csv(os.path.join(self._tmp_path, 'etf_other_sorted.csv'))
+        print(other_etf)
 
     def store_pe(self, index_id, old_df, new_df):
-        db_file = os.path.join(db_path, index_id + '.csv')
+        db_file = os.path.join(self._db_path, index_id + '.csv')
 
         try:
             if self._rewrite:
@@ -89,7 +127,7 @@ class Pe(object):
             print('Update {} failed.'.format(index_id))
 
     def update_db(self):
-        df = pd.read_csv(index_file_path)
+        df = pd.read_csv(self._index_file_path)
 
         for i in range(len(df)):
             index_id = df['index_id'].iloc[i].split('.')[0].upper()
@@ -97,7 +135,7 @@ class Pe(object):
             index_tag = df['tag'].iloc[i]
             print('{}: Update PE index for {}/{}'.format(i, index_id, index_name))
 
-            db_file = os.path.join(db_path, index_id + '.csv')
+            db_file = os.path.join(self._db_path, index_id + '.csv')
             if os.access(db_file, os.R_OK):
                 old_df = pd.read_csv(db_file, index_col=0)
                 if str(old_df.index[-1]) >= self._latest_trade_day and not self._rewrite:
@@ -115,5 +153,9 @@ class Pe(object):
 
 
 if __name__ == "__main__":
-    pe = Pe()
+    work_path = os.getcwd()
+    print('work_path: {}'.format(work_path))
+    
+    pe = Pe(work_path)
     pe.update_db()
+    pe.order()
