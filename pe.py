@@ -22,7 +22,7 @@ class Pe(object):
         self._rewrite = False
         
         self._db_path = os.path.join(work_path, 'db')
-        self._tmp_path = os.path.join(work_path, 'tmp')  
+        self._mail_path = os.path.join(work_path, 'mail')  
         self._index_file_path = os.path.join(work_path, 'tmp', 'index.csv')
         #print('db path:{}, index:{}'.format(self._db_path, self._index_file_path))
 
@@ -47,17 +47,16 @@ class Pe(object):
         drop_duplicate_df.columns = ['ETF名称', 'ETF代码', '标签', '平均成交额', '指数名称', '指数代码']
         drop_duplicate_df['市盈率'] = pe
         drop_duplicate_df['市盈率百分位'] = pe_percentile
-
         
         # 将ETF分割为“宽基”和“非宽基”两类
         broad_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('宽基') != -1]
         broad_etf = broad_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
-        broad_etf.to_csv(os.path.join(self._tmp_path, 'etf_broad_sorted.csv'))
+        broad_etf.to_csv(os.path.join(self._mail_path, 'etf_broad_sorted.csv'))
         print(broad_etf)
 
         other_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('宽基') == -1]
         other_etf = other_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
-        other_etf.to_csv(os.path.join(self._tmp_path, 'etf_other_sorted.csv'))
+        other_etf.to_csv(os.path.join(self._mail_path, 'etf_other_sorted.csv'))
         print(other_etf)
 
     def store_pe(self, index_id, old_df, new_df):
