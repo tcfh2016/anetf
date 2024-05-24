@@ -152,7 +152,7 @@ class Pe(object):
 
 
 if __name__ == "__main__":
-    work_path = os.getcwd()
+    work_path = os.path.dirname(os.path.realpath(__file__))
     print('work_path: {}'.format(work_path))
     
     pe = Pe(work_path)
