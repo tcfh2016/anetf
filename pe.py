@@ -89,7 +89,7 @@ class Pe(object):
             new_df['标签'] = index_tag
             new_df['数据源'] = '韭圈儿'
             new_df = new_df[['日期', '指数代码', '指数名称', '标签', '市盈率', '数据源']].set_index('日期')
-            #print(new_df)
+            print(new_df.dtypes)
             self.store_pe(index_id, old_df, new_df)
             return True
         except Exception as e:
@@ -136,7 +136,8 @@ class Pe(object):
 
             db_file = os.path.join(self._db_path, index_id + '.csv')
             if os.access(db_file, os.R_OK):
-                old_df = pd.read_csv(db_file, index_col=0)
+                old_df = pd.read_csv(db_file, index_col=0, dtype={'指数代码':'object'})
+                print(old_df.dtypes)
                 if str(old_df.index[-1]) >= self._latest_trade_day and not self._rewrite:
                     print('No new data need to be updated')
                     continue
