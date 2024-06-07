@@ -136,8 +136,7 @@ class Pe(object):
 
             db_file = os.path.join(self._db_path, index_id + '.csv')
             if os.access(db_file, os.R_OK):
-                old_df = pd.read_csv(db_file, index_col=0, dtype={'指数代码':'object'})
-                print(old_df.dtypes)
+                old_df = pd.read_csv(db_file, index_col=0, dtype={'指数代码':'object'})                
                 if str(old_df.index[-1]) >= self._latest_trade_day and not self._rewrite:
                     print('No new data need to be updated')
                     continue
