@@ -12,11 +12,12 @@ import datetime as dt
 from email.message import EmailMessage
 
 class HtmlReporter(object):
-    def __init__(self, server, port, authcode, date):
+    def __init__(self, server, port, authcode, date, script_path):
         self._server = server
         self._port = port
         self._authcode = authcode
         self._date = date   
+        self._script_path = script_path
         self._head = '''
         <!DOCTYPE html>
         <html lang="en" dir="ltr">
@@ -153,10 +154,10 @@ class HtmlReporter(object):
         msg['To'] = ['lianbch@163.com']
 
         etfs_broad = pd.read_csv(
-            os.path.join(os.getcwd(), 'mail', 'etf_broad_sorted.csv'), 
+            os.path.join(self._script_path, 'mail', 'etf_broad_sorted.csv'), 
             usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
         etfs_other = pd.read_csv(
-            os.path.join(os.getcwd(), 'mail', 'etf_other_sorted.csv'), 
+            os.path.join(self._script_path, 'mail', 'etf_other_sorted.csv'), 
             usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
 
         # 填充邮件正文
