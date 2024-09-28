@@ -1,7 +1,6 @@
 import os
 import datetime as dt
 import configparser
-
 import mail.mail as mail
 
 config = configparser.ConfigParser()
