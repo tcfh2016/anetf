@@ -26,6 +26,7 @@ def etf_info() -> pd.DataFrame:
     df = pd.DataFrame(rows)
     df = df[(df['avgamount'] > 1000) & (df['name'].str.find('债') == -1)].reset_index(drop=True)
     df.to_csv(os.path.join(tmp_path, 'etf.csv'))
+
     return df
 
 

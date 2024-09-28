@@ -63,7 +63,7 @@ class Pe(object):
         db_file = os.path.join(self._db_path, index_id + '.csv')
 
         try:
-            if self._rewrite:
+            if self._rewrite or old_df.empty:
                 new_df.to_csv(db_file)
             else:
                 # pe数据无更新
@@ -120,7 +120,7 @@ class Pe(object):
             record = [self._latest_trade_day, index_id, index_nm, index_tag, gz_df.loc[index_id, 'PE滚动'], '国证指数']
             new_df = pd.DataFrame([record], columns=['日期', '指数代码', '指数名称', '标签', '市盈率', '数据源'])
             new_df = new_df.set_index('日期')
-            #print(new_df)
+            print(new_df)
             self.store_pe(index_id, old_df, new_df)
         else:
             print('Update {} failed.'.format(index_id))
