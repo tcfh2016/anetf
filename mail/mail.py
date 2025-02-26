@@ -153,15 +153,19 @@ class HtmlReporter(object):
         msg['From'] = sender
         msg['To'] = ['lianbch@163.com']
 
+        etfs_oversea = pd.read_csv(
+            os.path.join(self._script_path, 'mail', 'etf_overseas_sorted.csv'), 
+            usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
         etfs_broad = pd.read_csv(
-            os.path.join(self._script_path, 'mail', 'etf_broad_sorted.csv'), 
+            os.path.join(self._script_path, 'mail', 'etf_diversify_sorted.csv'), 
             usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
         etfs_other = pd.read_csv(
-            os.path.join(self._script_path, 'mail', 'etf_other_sorted.csv'), 
+            os.path.join(self._script_path, 'mail', 'etf_others_sorted.csv'), 
             usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
 
         # 填充邮件正文
         html = self._head \
+               + self.construct_ETF_list(etfs_oversea, '跨境') \
                + self.construct_ETF_list(etfs_broad, '宽基') \
                + self.construct_ETF_list(etfs_other, '其他') \
                + self._tail
