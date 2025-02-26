@@ -9,6 +9,8 @@ import pandas as pd
 import numpy as np
 import akshare as ak
 
+from ext import jq
+
 gz_df = ak.index_all_cni().set_index('指数代码')
 
 def calc_percentile(arr):
@@ -83,7 +85,7 @@ class Pe(object):
     def update_jq(self, index_id, index_nm, index_tag, old_df):
         try:
             print('JQ: Update PE index id({}), name({})'.format(index_id, index_nm))
-            new_df = ak.index_value_hist_funddb(symbol=index_nm).astype({'日期':str})
+            new_df = jq.index_value_hist_funddb(symbol=index_nm).astype({'日期':str})
             new_df['指数代码'] = index_id
             new_df['指数名称'] = index_nm
             new_df['标签'] = index_tag

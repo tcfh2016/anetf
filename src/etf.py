@@ -22,7 +22,7 @@ def etf_info() -> pd.DataFrame:
     ## 过滤成交额大于1000万，过滤债券ETF
     #df = df[(df['volume'] > 1000) & (df['fund_nm'].str.find('债') == -1)]
     
-    #组合宝数据处理
+    #组合宝数据处理，获取日均交易额大于1亿的ETF
     df = pd.DataFrame(rows)
     df = df[(df['avgamount'] > 1000) & (df['name'].str.find('债') == -1)].reset_index(drop=True)
     df.to_csv(os.path.join(tmp_path, 'etf.csv'))
