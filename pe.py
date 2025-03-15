@@ -170,5 +170,5 @@ if __name__ == "__main__":
     print('work_path: {}'.format(work_path))
     
     pe = Pe(work_path)
-    #pe.update_db()
+    pe.update_db()
     pe.order()
