@@ -53,7 +53,17 @@ def etf_info() -> pd.DataFrame:
 
     return df
 
+etf_index_mapping_table = {
+    # ETF列表里面的“指数名称”，指数列表里面的“指数名称”，指数列表里面的“指数代码”
+    '港股通内地金融港元指数':['中证香港银行投资指数', '930792']
+}
+
 def find_index_id(name) -> tuple:
+    # 先查手动定义的映射表
+    if name in etf_index_mapping_table:
+        values = etf_index_mapping_table[name]
+        return (values[0], values[1])
+
     # 先从韭圈儿找，指数代码带后缀，如000994.CSI，399102.SZ，HSTECH.HI
     for i in range(len(jq_df)):
         if name.find(jq_df['指数名称'][i]) != -1:
