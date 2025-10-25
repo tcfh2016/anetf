@@ -57,12 +57,14 @@ class Pe(object):
                 
         # 跨境
         overseals_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('跨境') != -1]
+        overseals_etf = overseals_etf[pd.notnull(overseals_etf['标签'])]
         overseals_etf = overseals_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
         overseals_etf.to_csv(os.path.join(self._mail_path, 'etf_overseas_sorted.csv'))
         print(overseals_etf)
         
         # 国内-宽基
         diversify_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('宽基') != -1]
+        diversify_etf = diversify_etf[pd.notnull(diversify_etf['标签'])]
         diversify_etf = diversify_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
         diversify_etf.to_csv(os.path.join(self._mail_path, 'etf_diversify_sorted.csv'))
         print(diversify_etf)
