@@ -19,8 +19,8 @@ def calc_percentile(arr):
 
 class Pe(object):
     def __init__(self, work_path):
-        df = ak.stock_zh_a_hist(symbol='000001', period='daily', start_date='20240301', adjust="")
-        self._latest_trade_day = str(df['日期'].iloc[-1])
+        df = ak.stock_zh_a_daily(symbol="sz000001", start_date="20240301", adjust="qfq")
+        self._latest_trade_day = str(df['date'].iloc[-1])
         self._rewrite = False
         
         self._db_path = os.path.join(work_path, 'db')
