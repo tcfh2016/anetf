@@ -6,10 +6,13 @@ Desc: 邮件报告
 """
 
 import os
+import logging
 import smtplib
 import pandas as pd
 import datetime as dt
 from email.message import EmailMessage
+
+logger = logging.getLogger(__name__)
 
 class HtmlReporter(object):
     def __init__(self, server, port, authcode, date, script_path):
@@ -92,11 +95,16 @@ class HtmlReporter(object):
         '''
 
     def get_eva_status(self, pe, pe_percentile):
+        if pd.isna(pe) or pd.isna(pe_percentile):
+            return "normal"
+
         if (pe < 15 or pe_percentile < 0.10):
             return "low"
 
         if (pe > 50 or pe_percentile > 0.90):
             return "high"
+
+        return "normal"
         
     def construct_ETF_list(self, etf, series):
         etf_table = """
@@ -120,6 +128,9 @@ class HtmlReporter(object):
             pe_percentile = etf['市盈率百分位'].iloc[i]
             eva_status = self.get_eva_status(pe, pe_percentile)
 
+            pe_str = str(round(pe, 2)) if pd.notna(pe) else '-'
+            pe_pct_str = str(round(pe_percentile * 100, 2)) + '%' if pd.notna(pe_percentile) else '-'
+
             etf_table += """
             <tr  class="{}">
                 <td>{}</td>
@@ -134,8 +145,8 @@ class HtmlReporter(object):
                        etf['ETF代码'].iloc[i],
                        etf['指数名称'].iloc[i],
                        str(etf['指数代码'].iloc[i]),
-                       str(round(pe, 2)),
-                       str(round(pe_percentile * 100, 2)) + '%')
+                       pe_str,
+                       pe_pct_str)
 
         etf_table += """
         </table>
@@ -176,8 +187,9 @@ class HtmlReporter(object):
             mail_server = smtplib.SMTP_SSL(self._server, port=self._port)
             mail_server.login(sender, self._authcode)
             mail_server.send_message(msg)
+            logger.info('Email sent successfully.')
         except smtplib.SMTPException as ex:
-            print("Error: send failure = ", ex)
+            logger.error("Error: send failure = %s", ex)
 
 if __name__ == '__main__':
     date = dt.date.today()-dt.timedelta(days=1)

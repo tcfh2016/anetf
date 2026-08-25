@@ -1,7 +1,30 @@
 import hashlib
 import time
+import logging
 import requests
 import pandas as pd
+
+logger = logging.getLogger(__name__)
+
+# 缓存指数名称→代码映射，避免重复请求
+_name_code_map_cache = None
+
+
+def _request_with_retry(url, json=None, max_retries=3, delay=2):
+    """带重试机制的 HTTP 请求"""
+    for attempt in range(max_retries):
+        try:
+            if json is not None:
+                r = requests.post(url, json=json)
+            else:
+                r = requests.get(url)
+            r.raise_for_status()
+            return r
+        except Exception as e:
+            logger.warning('Request to {} failed (attempt {}/{}): {}'.format(url, attempt + 1, max_retries, e))
+            if attempt < max_retries - 1:
+                time.sleep(delay)
+    raise RuntimeError('Request to {} failed after {} retries'.format(url, max_retries))
 
 def __get_current_timestamp_ms() -> int:
     """
@@ -184,6 +207,15 @@ def __create_encode(
     )
     return t["data"]
 
+def _get_name_code_map():
+    """获取并缓存指数名称→代码映射"""
+    global _name_code_map_cache
+    if _name_code_map_cache is None:
+        df = index_value_name_funddb()
+        _name_code_map_cache = dict(zip(df['指数名称'], df['指数代码']))
+    return _name_code_map_cache
+
+
 def index_value_name_funddb() -> pd.DataFrame:
     """
     funddb-指数估值-指数代码
@@ -210,7 +242,7 @@ def index_value_name_funddb() -> pd.DataFrame:
         "act_time": str(get_current_timestamp_ms_str)
     }
     payload.update(encode_params)
-    r = requests.post(url, json=payload)
+    r = _request_with_retry(url, json=payload)
     data_json = r.json()
     temp_df = pd.DataFrame(data_json["data"]["right_list"])
     
@@ -291,13 +323,7 @@ def index_value_hist_funddb(
         "股息率": "xilv",
         "风险溢价": "fed",
     }
-    index_value_name_funddb_df = index_value_name_funddb()
-    name_code_map = dict(
-        zip(
-            index_value_name_funddb_df["指数名称"],
-            index_value_name_funddb_df["指数代码"],
-        )
-    )
+    name_code_map = _get_name_code_map()
     url = "https://api.jiucaishuo.com/v2/guzhi/newtubiaolinedata"
     get_current_timestamp_ms_str = __get_current_timestamp_ms()
     encode_params = __create_encode(
@@ -321,7 +347,7 @@ def index_value_hist_funddb(
         "act_time": str(get_current_timestamp_ms_str)
     }
     payload.update(encode_params)
-    r = requests.post(url, json=payload)
+    r = _request_with_retry(url, json=payload)
     data_json = r.json()
     big_df = pd.DataFrame()
     temp_df = pd.DataFrame(
