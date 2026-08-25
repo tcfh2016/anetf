@@ -5,12 +5,30 @@ Desc: 更新ETF对应的指数的市盈率
 """
 
 import os
+import socket
 import logging
+import requests
 import pandas as pd
 import numpy as np
 import akshare as ak
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ext import jq
+
+# ========== 全局 HTTP 超时控制（双保险） ==========
+# 1. socket 层兜底
+socket.setdefaulttimeout(15)
+
+# 2. requests Session 层 Monkey Patch —— requests/urllib3 默认不继承 socket.setdefaulttimeout，
+#    这样包括 akshare 内部的所有 requests 调用都会自动带 12 秒超时，永远不会无限挂死。
+_DEFAULT_HTTP_TIMEOUT = 12
+_orig_session_request = requests.Session.request
+
+def _session_request_with_timeout(self, method, url, **kwargs):
+    kwargs.setdefault('timeout', _DEFAULT_HTTP_TIMEOUT)
+    return _orig_session_request(self, method, url, **kwargs)
+
+requests.Session.request = _session_request_with_timeout
 
 logger = logging.getLogger(__name__)
 
@@ -289,7 +307,7 @@ class Pe(object):
                     else:
                         # 点位扩展后仍不足，保持 "-"
                         value_percentile.append(np.nan)
-                    data_types.append('点位')
+                    data_types.append('指数点位')
                 else:
                     # 既无PE也无点位有效数据
                     values.append(np.nan)
@@ -301,12 +319,12 @@ class Pe(object):
                 data_types.append('')
 
         drop_duplicate_df.columns = ['ETF名称', 'ETF代码', '标签', '平均成交额', '指数名称', '指数代码']
-        drop_duplicate_df['估值'] = values
-        drop_duplicate_df['估值百分位'] = value_percentile
-        drop_duplicate_df['估值类型'] = data_types
+        drop_duplicate_df['当前值'] = values
+        drop_duplicate_df['历史百分位'] = value_percentile
+        drop_duplicate_df['指标类型'] = data_types
                 
         def sort_and_save(etf_subset, filename, label):
-            etf_subset = etf_subset.sort_values(by=['估值', '估值百分位']).reset_index(drop=True)
+            etf_subset = etf_subset.sort_values(by=['当前值', '历史百分位']).reset_index(drop=True)
             etf_subset.to_csv(os.path.join(self._mail_path, filename))
             logger.info('{} ETF count: {}'.format(label, len(etf_subset)))
 
@@ -568,45 +586,100 @@ class Pe(object):
             return True
         return False
 
-    def update_db(self):
+    def update_db(self, max_workers=12):
+        """更新指数数据库（PE/点位）。
+        - 先对 index_id 去重，避免同一指数（被多只ETF复用）重复请求
+        - 对需要真实请求的任务用线程池并发（HTTP IO 密集型，默认 12 线程提速 10x+）
+        """
         df = pd.read_csv(self._index_file_path)
 
-        for i in range(len(df)):
-            index_id = df['index_id'].iloc[i].split('.')[0].upper()
-            index_name = df['index_name'].iloc[i]
-            index_tag = df['tag'].iloc[i]
+        # —— Step 1: 按 index_id 去重（和 order() 一样按 avgamount 排序保留最大那行）
+        #    834 个 ETF → ~274 个唯一指数，直接砍掉约 2/3 的循环迭代
+        uniq = df.sort_values(by=['avgamount']).drop_duplicates(
+            subset=['index_id'], keep='last', ignore_index=True)
+        logger.info('update_db: total ETF {} rows -> dedup to {} unique indices'.format(len(df), len(uniq)))
 
-            # 跳过不支持数据获取的指数，避免无意义请求
+        # —— Step 2: 逐个做"跳过/需要更新"判定（纯本地 IO，毫秒级）
+        tasks = []   # 需要真实请求的条目列表: (i, index_id, index_name, index_tag, old_df)
+        skipped = 0
+        for i in range(len(uniq)):
+            index_id = str(uniq['index_id'].iloc[i]).split('.')[0].upper()
+            index_name = uniq['index_name'].iloc[i]
+            index_tag = uniq['tag'].iloc[i]
+
+            # 跳过不支持的指数
             if index_id in unsupported_index_ids:
                 logger.info('{}: Skip unsupported index {}/{}'.format(i, index_id, index_name))
+                skipped += 1
                 continue
-
-            logger.info('{}: Update PE index for {}/{}'.format(i, index_id, index_name))
 
             db_file = os.path.join(self._db_path, index_id + '.csv')
             need_update = True
             if os.access(db_file, os.R_OK):
-                old_df = pd.read_csv(db_file, index_col=0, dtype={'指数代码':'object'})
-                # 只有当数据有有效内容 且 日期是最新的 才跳过更新
-                if str(old_df.index[-1]) >= self._latest_trade_day and not self._rewrite and self._has_valid_data(old_df):
-                    logger.info('No new data need to be updated')
+                old_df = pd.read_csv(db_file, index_col=0, dtype={'指数代码': 'object'})
+                if (str(old_df.index[-1]) >= self._latest_trade_day
+                        and not self._rewrite
+                        and self._has_valid_data(old_df)):
                     need_update = False
+                    skipped += 1
             else:
                 old_df = pd.DataFrame(columns=['日期', '指数代码', '指数名称', '市盈率', '数据源'])
-            
-            if not need_update:
-                continue
-         
-            # 首先查找韭圈儿的估值信息，因为最全，包括了国内、国外的主要指数多年的数据
-            if not self.update_jq(index_id, index_name, index_tag, old_df):
-                # 其次查找中证官网的估值信息，包括数天的估值信息
-                if not self.update_zz(index_id, index_name, index_tag, old_df):
-                    # 再查找国证网站的估值信息，仅包含最近交易日的估值信息
-                    if not self.update_gz(index_id, index_name, index_tag, old_df):
-                        # 再从中证指数历史行情获取PE（覆盖中证系列全量指数）
-                        if not self.update_csindex(index_id, index_name, index_tag, old_df):
-                            # 最后降级为获取指数点位，用于没有PE的指数（商品、债券、海外等）
-                            self.update_price(index_id, index_name, index_tag, old_df)
+
+            if need_update:
+                tasks.append((i, index_id, index_name, index_tag, old_df))
+
+        logger.info('update_db: {} skip (cached/unsupported), {} need fresh fetch'.format(skipped, len(tasks)))
+
+        # —— Step 3: 快速路径：如果没有需要更新的，直接返回
+        if not tasks:
+            return
+
+        # —— Step 4: 用线程池并发执行需要数据源请求的任务（IO 密集型）
+        def _update_one(tup):
+            i, index_id, index_name, index_tag, old_df = tup
+            try:
+                logger.info('{}: Update PE index for {}/{}'.format(i, index_id, index_name))
+
+                is_cni = index_id.startswith('980') or index_id.startswith('987')
+                first_tag = str(index_tag).split('，')[0] if pd.notna(index_tag) else ''
+                is_non_equity = first_tag in ('商品', '债券')
+                is_overseas_code = (
+                    index_id.startswith('HS')
+                    or index_id in ('SP500', 'DJI', 'NDX', 'NBI', 'SHAU', 'AU9999', 'M9999', 'ICEA')
+                )
+                skip_domestic_pe = is_non_equity or is_overseas_code
+
+                pe_updated = self.update_jq(index_id, index_name, index_tag, old_df)
+
+                if not pe_updated and not skip_domestic_pe and not is_cni:
+                    pe_updated = self.update_zz(index_id, index_name, index_tag, old_df)
+
+                if not pe_updated and not skip_domestic_pe:
+                    pe_updated = self.update_gz(index_id, index_name, index_tag, old_df)
+
+                if not pe_updated and not skip_domestic_pe and not is_cni:
+                    pe_updated = self.update_csindex(index_id, index_name, index_tag, old_df)
+
+                if not pe_updated:
+                    self.update_price(index_id, index_name, index_tag, old_df)
+
+                return (index_id, True, None)
+            except Exception as e:
+                logger.error('{}: Update {}/{} raised exception: {}'.format(i, index_id, index_name, e))
+                return (index_id, False, str(e))
+
+        done, fail = 0, 0
+        with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix='pe-update') as pool:
+            future_to_idx = {pool.submit(_update_one, t): t[1] for t in tasks}
+            for fut in as_completed(future_to_idx):
+                idx, ok, err = fut.result()
+                if ok:
+                    done += 1
+                else:
+                    fail += 1
+                    logger.error('Index {} final update failed: {}'.format(idx, err))
+
+        logger.info('update_db finished: done={}, failed={}'.format(done, fail))
 
 
 if __name__ == "__main__":

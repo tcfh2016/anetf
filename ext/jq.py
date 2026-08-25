@@ -10,14 +10,14 @@ logger = logging.getLogger(__name__)
 _name_code_map_cache = None
 
 
-def _request_with_retry(url, json=None, max_retries=3, delay=2):
-    """带重试机制的 HTTP 请求"""
+def _request_with_retry(url, json=None, max_retries=2, delay=1, timeout=10):
+    """带重试和超时的 HTTP 请求。默认 10s 超时 + 最多 2 次，避免长时间挂死。"""
     for attempt in range(max_retries):
         try:
             if json is not None:
-                r = requests.post(url, json=json)
+                r = requests.post(url, json=json, timeout=timeout)
             else:
-                r = requests.get(url)
+                r = requests.get(url, timeout=timeout)
             r.raise_for_status()
             return r
         except Exception as e:

@@ -109,7 +109,7 @@ class HtmlReporter(object):
         if pd.isna(percentile):
             return "normal"
 
-        # 市盈率阈值只对PE类型有意义（且需为正值），点位类只看百分位
+        # 市盈率阈值只对PE类型有意义（且需为正值），指数点位类只看百分位
         if value_type == 'PE' and pd.notna(value) and 0 < value < 15:
             return "low"
         if percentile < 0.10:
@@ -134,16 +134,16 @@ class HtmlReporter(object):
                 <th>基金代码</th>
                 <th>指数名称</th>
                 <th>指数代码</th>
-                <th>估值类型</th>
-                <th>估值</th>
-                <th>估值百分位</th>
+                <th>指标类型</th>
+                <th>当前值</th>
+                <th>历史百分位</th>
               </tr>
         """.format(series)
 
         for i in range(len(etf)):
-            value_type = etf['估值类型'].iloc[i]
-            value = etf['估值'].iloc[i]
-            percentile = etf['估值百分位'].iloc[i]
+            value_type = etf['指标类型'].iloc[i]
+            value = etf['当前值'].iloc[i]
+            percentile = etf['历史百分位'].iloc[i]
             eva_status = self.get_eva_status(value, percentile, value_type)
 
             value_str = str(round(value, 2)) if pd.notna(value) else '-'
@@ -185,7 +185,7 @@ class HtmlReporter(object):
         msg['From'] = sender
         msg['To'] = ['lianbch@163.com']
 
-        etf_cols = ['ETF名称', 'ETF代码', '指数名称', '指数代码', '估值类型', '估值', '估值百分位']
+        etf_cols = ['ETF名称', 'ETF代码', '指数名称', '指数代码', '指标类型', '当前值', '历史百分位']
         etf_tables = []
         for key, label in categories:
             csv_path = os.path.join(self._script_path, 'mail', 'etf_{}_sorted.csv'.format(key))
