@@ -3,5 +3,6 @@ config.ini
 __pycache__/
 *.pyc
 *.swp
-tmp/
 db/
+*.db
+etf.csv

@@ -6,15 +6,32 @@ Desc: 获取ETF列表
 
 import os
 import logging
+import sqlite3
+from datetime import datetime
 import requests
 import pandas as pd
 import akshare as ak
-from pathlib import Path
 from ext import jq
 
 logger = logging.getLogger(__name__)
 
-tmp_path = os.path.join(Path(os.getcwd()), 'tmp')
+# 工程根目录（脚本所在目录）
+project_dir = os.path.dirname(os.path.realpath(__file__))
+
+# ETF→指数映射数据库（与 pe.py 共用同一个 anetf.db）
+db_file = os.path.join(project_dir, 'anetf.db')
+
+CREATE_ETF_SQL = """
+CREATE TABLE IF NOT EXISTS etf (
+    code        TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    tag         TEXT,
+    avgamount   REAL,
+    index_name  TEXT,
+    index_id    TEXT,
+    updated_at  TEXT
+);
+"""
 
 def info_rows() -> list:
     # 集思录: https://www.jisilu.cn/data/etf/#index
@@ -54,7 +71,7 @@ def etf_info() -> pd.DataFrame:
     df = pd.DataFrame(rows)
     df = df[(df['avgamount'] > 1000) & (df['name'].str.find('债') == -1)].reset_index(drop=True)
     df = fix_etf_tags(df)
-    df.to_csv(os.path.join(tmp_path, 'etf.csv'))
+    df.to_csv(os.path.join(project_dir, 'etf.csv'))
 
     return df
 
@@ -233,8 +250,18 @@ def etf_map2_index(jq_df, gz_df, jk_df, cs_df):
     etfs['index_name'] = names
     etfs['index_id'] = ids
     etfs = etfs[pd.notnull(etfs['index_id'])].reset_index(drop=True)
-    etfs.to_csv(os.path.join(tmp_path, 'index.csv'))
-    logger.info('Mapped ETF to index, total: {}'.format(len(etfs)))
+
+    # 全量刷新写入数据库（替代 tmp/index.csv）
+    rows = etfs[['name', 'code', 'tag', 'avgamount', 'index_name', 'index_id']].copy()
+    rows['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    conn = sqlite3.connect(db_file)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute(CREATE_ETF_SQL)
+    conn.execute("DELETE FROM etf")
+    rows.to_sql('etf', conn, if_exists='append', index=False, method='multi')
+    conn.commit()
+    conn.close()
+    logger.info('Mapped ETF to index, total: {}, written to {}'.format(len(etfs), db_file))
 
 
 if __name__ == "__main__":

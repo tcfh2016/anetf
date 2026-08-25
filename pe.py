@@ -7,6 +7,8 @@ Desc: 更新ETF对应的指数的市盈率
 import os
 import socket
 import logging
+import sqlite3
+import threading
 import requests
 import pandas as pd
 import numpy as np
@@ -29,6 +31,23 @@ def _session_request_with_timeout(self, method, url, **kwargs):
     return _orig_session_request(self, method, url, **kwargs)
 
 requests.Session.request = _session_request_with_timeout
+
+# index_valuation 表：替代 db/ 下 305 个 CSV 的统一存储
+# PE 类与点位类合二为一：pe/point 均为可空列，由 data_type 区分
+# 复合主键 (index_id, date) 天然实现"同日不重、新日才追加"
+CREATE_INDEX_VALUATION_SQL = """
+CREATE TABLE IF NOT EXISTS index_valuation (
+    index_id   TEXT NOT NULL,
+    date       TEXT NOT NULL,
+    index_name TEXT,
+    tag        TEXT,
+    pe         REAL,
+    point      REAL,
+    data_type  TEXT NOT NULL,
+    source     TEXT,
+    PRIMARY KEY (index_id, date)
+);
+"""
 
 logger = logging.getLogger(__name__)
 
@@ -108,11 +127,20 @@ class Pe(object):
         df = ak.stock_zh_a_daily(symbol="sz000001", start_date="20240301", adjust="qfq")
         self._latest_trade_day = str(df['date'].iloc[-1])
         self._rewrite = False
-        
-        self._db_path = os.path.join(work_path, 'db')
-        self._mail_path = os.path.join(work_path, 'mail')  
-        self._index_file_path = os.path.join(work_path, 'tmp', 'index.csv')
+
+        self._db_file = os.path.join(work_path, 'anetf.db')
+        self._mail_path = os.path.join(work_path, 'mail')
         self._gz_df = ak.index_all_cni().set_index('指数代码')
+
+        # 初始化 SQLite：WAL（读写不互斥）+ busy_timeout（锁冲突自动等）+ 建表
+        # check_same_thread=False：连接在主线程创建，但写库由 worker 触发；
+        #   靠 self._db_lock 保证同一时刻只有一个线程操作连接，故跨线程共享安全。
+        self._conn = sqlite3.connect(self._db_file, check_same_thread=False)
+        self._conn.execute("PRAGMA journal_mode=WAL")
+        self._conn.execute("PRAGMA busy_timeout=30000")
+        self._conn.execute(CREATE_INDEX_VALUATION_SQL)
+        self._conn.commit()
+        self._db_lock = threading.Lock()
 
     def _extend_pe_history(self, index_id, current_pe_s):
         """尝试扩展 PE 历史数据长度（仅使用 PE 数据源，绝不使用点位）。
@@ -259,7 +287,7 @@ class Pe(object):
 
     def order(self):
         # 由于多只ETF跟踪相同指数，所以先进行去重操作，只保留成交量最高的ETF
-        df = pd.read_csv(self._index_file_path, usecols=['name', 'code', 'tag', 'avgamount', 'index_name', 'index_id'])
+        df = self._load_etf_mapping()
         drop_duplicate_df = df.sort_values(by=['avgamount']).drop_duplicates(subset=['index_id'], keep='last')
 
         # 过滤掉不支持数据获取的指数，不在邮件中展示
@@ -274,17 +302,13 @@ class Pe(object):
         # 股票类ETF用市盈率(PE)，非股票类ETF用指数点位
         values, value_percentile, data_types = [], [], []
         for i in range(len(drop_duplicate_df)):
-            index_id = drop_duplicate_df['index_id'].iloc[i].split('.')[0].upper()            
-            index_file = os.path.join(self._db_path, index_id + '.csv')
+            index_id = drop_duplicate_df['index_id'].iloc[i].split('.')[0].upper()
+            etf_df = self._load_index(index_id)
 
-            if os.access(index_file, os.R_OK):
-                etf_df = pd.read_csv(index_file, dtype={'指数代码':'object'})
-                has_pe_col = '市盈率' in etf_df.columns
-                has_point_col = '点位' in etf_df.columns
-
-                # 确定有效数据列：优先PE，PE全为空时降级用点位
-                pe_valid = has_pe_col and pd.notna(etf_df['市盈率'].iloc[-1])
-                point_valid = has_point_col and pd.notna(etf_df['点位'].iloc[-1])
+            if not etf_df.empty:
+                # _load_index 总是返回 市盈率/点位 两列（缺值为 NaN），优先 PE，PE 全空降级用点位
+                pe_valid = pd.notna(etf_df['市盈率'].iloc[-1])
+                point_valid = pd.notna(etf_df['点位'].iloc[-1])
 
                 if pe_valid:
                     # 估值类型=PE：只使用 PE 数据计算百分位，绝不使用点位
@@ -342,25 +366,86 @@ class Pe(object):
             etf_subset = drop_duplicate_df.iloc[grouped[key]]
             sort_and_save(etf_subset, 'etf_{}_sorted.csv'.format(key), label)
 
-    def store_pe(self, index_id, old_df, new_df):
-        db_file = os.path.join(self._db_path, index_id + '.csv')
+    def _load_index(self, index_id):
+        """从数据库读取某指数的全部历史估值（按日期升序）。
+        返回 DataFrame 以 date 为索引，列名与旧 CSV 兼容（市盈率/点位/数据类型/数据源…），
+        便于 store_pe / order / _extend_*_history 等沿用原逻辑。
+        """
+        sql = ("SELECT date, index_id, index_name, tag, pe, point, data_type, source "
+               "FROM index_valuation WHERE index_id=? ORDER BY date")
+        df = pd.read_sql_query(sql, self._conn, params=(index_id,))
+        df = df.rename(columns={
+            'index_id': '指数代码', 'index_name': '指数名称', 'tag': '标签',
+            'pe': '市盈率', 'point': '点位', 'data_type': '数据类型', 'source': '数据源'})
+        return df.set_index('date')
 
+    def _load_etf_mapping(self):
+        """从数据库读取 ETF→指数映射（替代 tmp/index.csv）。
+        列顺序与旧 CSV 的 usecols 一致：name, code, tag, avgamount, index_name, index_id，
+        以保持 order() 末尾按位置重命名为中文列名的行为不变。
+        """
+        sql = "SELECT name, code, tag, avgamount, index_name, index_id FROM etf"
         try:
-            if self._rewrite or old_df.empty:
-                new_df.to_csv(db_file)
-            else:
-                # pe数据无更新
-                if old_df.index[-1] == new_df.index[-1]:
-                    return
-                if len(new_df) > 1:
-                    diff = new_df[new_df.index > old_df.index[-1]]
-                else:
-                    diff = new_df
+            return pd.read_sql_query(sql, self._conn)
+        except sqlite3.OperationalError:
+            # etf 表尚未创建（未跑过 etf.py 刷新）——返回空表，避免阻断每日流程
+            logger.warning("etf table not found; run `python etf.py` to refresh the mapping")
+            return pd.DataFrame(columns=['name', 'code', 'tag', 'avgamount', 'index_name', 'index_id'])
 
+    def _to_db_records(self, index_id, diff):
+        """把 update_* 产出的 DataFrame（PE 类或点位类）转为统一 DB schema 的元组列表。
+        NaN 统一转 None，以便 SQLite 存为 NULL。
+        """
+        is_pe = '市盈率' in diff.columns
+        rows = pd.DataFrame({
+            'index_id':   index_id,
+            'date':       diff.index.astype(str),
+            'index_name': diff['指数名称'] if '指数名称' in diff.columns else None,
+            'tag':        diff['标签'] if '标签' in diff.columns else None,
+            'pe':         diff['市盈率'] if is_pe else np.nan,
+            'point':      diff['点位'] if '点位' in diff.columns else np.nan,
+            'data_type':  diff['数据类型'] if '数据类型' in diff.columns else ('PE' if is_pe else '点位'),
+            'source':     diff['数据源'] if '数据源' in diff.columns else None,
+        })
+        cols = ['index_id', 'date', 'index_name', 'tag', 'pe', 'point', 'data_type', 'source']
+        return [
+            tuple(None if pd.isna(v) else v for v in row)
+            for row in rows[cols].itertuples(index=False, name=None)
+        ]
+
+    def store_pe(self, index_id, old_df, new_df):
+        """将新估值写入数据库 index_valuation 表。
+        - 正常模式：只追加 old_df 最新日期之后的新行（INSERT OR IGNORE 防重复）
+        - _rewrite 模式：先删该指数全部旧数据，再全量写入
+        线程安全：写库段加 self._db_lock 串行化，保证并发 worker 共享连接安全。
+        """
+        try:
+            if self._rewrite:
+                diff = new_df
+                with self._db_lock:
+                    self._conn.execute(
+                        "DELETE FROM index_valuation WHERE index_id=?", (index_id,))
+                    self._conn.commit()
+            elif old_df.empty:
+                diff = new_df
+            else:
+                # 数据无更新（最新日期相同）
+                if str(old_df.index[-1]) == str(new_df.index[-1]):
+                    return
+                diff = new_df[new_df.index > old_df.index[-1]] if len(new_df) > 1 else new_df
                 if diff.empty:
                     return
-                logger.debug(diff)
-                pd.concat([old_df, diff]).to_csv(db_file)
+
+            logger.debug(diff)
+            records = self._to_db_records(index_id, diff)
+            if not records:
+                return
+            sql = ("INSERT OR IGNORE INTO index_valuation "
+                   "(index_id, date, index_name, tag, pe, point, data_type, source) "
+                   "VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+            with self._db_lock:
+                self._conn.executemany(sql, records)
+                self._conn.commit()
         except Exception as e:
             logger.error('Store pe for {} failed because of {}'.format(index_id, str(e)))
 
@@ -591,7 +676,7 @@ class Pe(object):
         - 先对 index_id 去重，避免同一指数（被多只ETF复用）重复请求
         - 对需要真实请求的任务用线程池并发（HTTP IO 密集型，默认 12 线程提速 10x+）
         """
-        df = pd.read_csv(self._index_file_path)
+        df = self._load_etf_mapping()
 
         # —— Step 1: 按 index_id 去重（和 order() 一样按 avgamount 排序保留最大那行）
         #    834 个 ETF → ~274 个唯一指数，直接砍掉约 2/3 的循环迭代
@@ -613,17 +698,14 @@ class Pe(object):
                 skipped += 1
                 continue
 
-            db_file = os.path.join(self._db_path, index_id + '.csv')
+            old_df = self._load_index(index_id)
             need_update = True
-            if os.access(db_file, os.R_OK):
-                old_df = pd.read_csv(db_file, index_col=0, dtype={'指数代码': 'object'})
+            if not old_df.empty:
                 if (str(old_df.index[-1]) >= self._latest_trade_day
                         and not self._rewrite
                         and self._has_valid_data(old_df)):
                     need_update = False
                     skipped += 1
-            else:
-                old_df = pd.DataFrame(columns=['日期', '指数代码', '指数名称', '市盈率', '数据源'])
 
             if need_update:
                 tasks.append((i, index_id, index_name, index_tag, old_df))
