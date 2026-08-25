@@ -14,6 +14,17 @@ from email.message import EmailMessage
 
 logger = logging.getLogger(__name__)
 
+# 与 pe.py 的分类保持一致：(分类键，邮件展示名)
+categories = [
+    ('crossborder', '跨境股票'),
+    ('broad', '宽基指数'),
+    ('sector', '行业股票'),
+    ('theme', '主题投资'),
+    ('strategy', '策略指数'),
+    ('commodity', '商品'),
+    ('bond', '固定收益'),
+]
+
 class HtmlReporter(object):
     def __init__(self, server, port, authcode, date, script_path):
         self._server = server
@@ -164,22 +175,18 @@ class HtmlReporter(object):
         msg['From'] = sender
         msg['To'] = ['lianbch@163.com']
 
-        etfs_oversea = pd.read_csv(
-            os.path.join(self._script_path, 'mail', 'etf_overseas_sorted.csv'), 
-            usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
-        etfs_broad = pd.read_csv(
-            os.path.join(self._script_path, 'mail', 'etf_diversify_sorted.csv'), 
-            usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
-        etfs_other = pd.read_csv(
-            os.path.join(self._script_path, 'mail', 'etf_others_sorted.csv'), 
-            usecols=['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位'])
+        etf_cols = ['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位']
+        etf_tables = []
+        for key, label in categories:
+            csv_path = os.path.join(self._script_path, 'mail', 'etf_{}_sorted.csv'.format(key))
+            if not os.path.exists(csv_path):
+                logger.warning('ETF list not found: {}'.format(csv_path))
+                continue
+            etfs = pd.read_csv(csv_path, usecols=etf_cols)
+            etf_tables.append(self.construct_ETF_list(etfs, label))
 
         # 填充邮件正文
-        html = self._head \
-               + self.construct_ETF_list(etfs_oversea, '跨境') \
-               + self.construct_ETF_list(etfs_broad, '宽基') \
-               + self.construct_ETF_list(etfs_other, '其他') \
-               + self._tail
+        html = self._head + ''.join(etf_tables) + self._tail
         msg.set_content(html, subtype='html')
         
         # 发送邮件

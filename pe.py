@@ -14,6 +14,37 @@ from ext import jq
 
 logger = logging.getLogger(__name__)
 
+# 一级标签 -> 分类（文件后缀，邮件展示名）
+# 按优先级判断：先按市场属性（跨境/宽基），再按一级标签细分股票类型，
+# 最后独立出非股票类资产（商品/债券），它们的估值口径与股票类不同
+categories = [
+    ('crossborder', '跨境股票'),
+    ('broad', '宽基指数'),
+    ('sector', '行业股票'),
+    ('theme', '主题投资'),
+    ('strategy', '策略指数'),
+    ('commodity', '商品'),
+    ('bond', '固定收益'),
+]
+
+first_tag_category = {
+    '行业': 'sector',
+    '主题': 'theme',
+    '策略': 'strategy',
+    '商品': 'commodity',
+    '债券': 'bond',
+}
+
+def classify(tag) -> str:
+    """根据标签判断ETF所属分类，返回分类键；无法识别时返回None"""
+    if pd.isna(tag):
+        return None
+    if tag.find('跨境') != -1:
+        return 'crossborder'
+    if tag.find('宽基') != -1:
+        return 'broad'
+    return first_tag_category.get(tag.split('，')[0])
+
 def calc_percentile(arr):
     lower = arr[arr < arr.iloc[-1]]
     return(lower.shape[0] / arr.shape[0])
@@ -35,46 +66,63 @@ class Pe(object):
         drop_duplicate_df = df.sort_values(by=['avgamount']).drop_duplicates(subset=['index_id'], keep='last')
         logger.info('ETF number: {}, drop to {} after remove duplicated ETF.'.format(len(df), len(drop_duplicate_df)))        
 
-        # 填充ETF的最新市盈率，以及市盈率百分位（有至少500个交易日的数据）
-        pe, pe_percentile = [], []
+        # 填充ETF的最新估值和百分位
+        # 股票类ETF用市盈率(PE)，非股票类ETF用指数点位
+        values, value_percentile, data_types = [], [], []
         for i in range(len(drop_duplicate_df)):
             index_id = drop_duplicate_df['index_id'].iloc[i].split('.')[0].upper()            
             index_file = os.path.join(self._db_path, index_id + '.csv')
 
             if os.access(index_file, os.R_OK):
-                etf_pe = pd.read_csv(index_file)
-                pe.append(etf_pe['市盈率'].iloc[-1])
-                if len(etf_pe) > 500:
-                    pe_percentile.append(calc_percentile(etf_pe['市盈率']))
+                etf_df = pd.read_csv(index_file, dtype={'指数代码':'object'})
+                has_pe_col = '市盈率' in etf_df.columns
+                data_type = etf_df['数据类型'].iloc[-1] if '数据类型' in etf_df.columns else 'PE'
+
+                if data_type == 'PE' and has_pe_col:
+                    val = etf_df['市盈率'].iloc[-1]
+                    values.append(val)
+                    if len(etf_df) > 500:
+                        value_percentile.append(calc_percentile(etf_df['市盈率']))
+                    else:
+                        value_percentile.append(np.nan)
+                    data_types.append('PE')
                 else:
-                    pe_percentile.append(np.nan)
+                    # 点位百分位
+                    val = etf_df['点位'].iloc[-1] if '点位' in etf_df.columns else np.nan
+                    values.append(val)
+                    if '点位' in etf_df.columns and len(etf_df) > 500:
+                        value_percentile.append(calc_percentile(etf_df['点位']))
+                    else:
+                        value_percentile.append(np.nan)
+                    data_types.append('点位')
             else:
-                pe.append(np.nan)
-                pe_percentile.append(np.nan)
+                values.append(np.nan)
+                value_percentile.append(np.nan)
+                data_types.append('')
 
         drop_duplicate_df.columns = ['ETF名称', 'ETF代码', '标签', '平均成交额', '指数名称', '指数代码']
-        drop_duplicate_df['市盈率'] = pe
-        drop_duplicate_df['市盈率百分位'] = pe_percentile
+        drop_duplicate_df['市盈率'] = values
+        drop_duplicate_df['市盈率百分位'] = value_percentile
+        drop_duplicate_df['数据类型'] = data_types
                 
-        # 跨境
-        overseals_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('跨境') != -1]
-        overseals_etf = overseals_etf[pd.notnull(overseals_etf['标签'])]
-        overseals_etf = overseals_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
-        overseals_etf.to_csv(os.path.join(self._mail_path, 'etf_overseas_sorted.csv'))
-        logger.info('Overseas ETF count: {}'.format(len(overseals_etf)))
-        
-        # 国内-宽基
-        diversify_etf = drop_duplicate_df[drop_duplicate_df['标签'].str.find('宽基') != -1]
-        diversify_etf = diversify_etf[pd.notnull(diversify_etf['标签'])]
-        diversify_etf = diversify_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
-        diversify_etf.to_csv(os.path.join(self._mail_path, 'etf_diversify_sorted.csv'))
-        logger.info('Diversify ETF count: {}'.format(len(diversify_etf)))
+        def sort_and_save(etf_subset, filename, label):
+            etf_subset = etf_subset.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
+            etf_subset.to_csv(os.path.join(self._mail_path, filename))
+            logger.info('{} ETF count: {}'.format(label, len(etf_subset)))
 
-        # 国内-非宽基（行业、主题、策略）        
-        others_etf = drop_duplicate_df[(drop_duplicate_df['标签'].str.find('宽基') == -1) & (drop_duplicate_df['标签'].str.find('跨境') == -1)]
-        others_etf = others_etf.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
-        others_etf.to_csv(os.path.join(self._mail_path, 'etf_others_sorted.csv'))
-        logger.info('Others ETF count: {}'.format(len(others_etf)))
+        # 按分类拆分并保存，分类规则见 classify()
+        grouped = {key: [] for key, _ in categories}
+        for i in range(len(drop_duplicate_df)):
+            key = classify(drop_duplicate_df['标签'].iloc[i])
+            if key is None:
+                logger.warning('Unclassified ETF: {} (tag={})'.format(
+                    drop_duplicate_df['ETF名称'].iloc[i], drop_duplicate_df['标签'].iloc[i]))
+                continue
+            grouped[key].append(i)
+
+        for key, label in categories:
+            etf_subset = drop_duplicate_df.iloc[grouped[key]]
+            sort_and_save(etf_subset, 'etf_{}_sorted.csv'.format(key), label)
 
     def store_pe(self, index_id, old_df, new_df):
         db_file = os.path.join(self._db_path, index_id + '.csv')
@@ -144,6 +192,93 @@ class Pe(object):
         else:
             logger.warning('Update {} failed, index not found in gz_df.'.format(index_id))
 
+    # 从中证指数历史行情获取PE（覆盖中证系列全量指数）
+    def update_csindex(self, index_id, index_nm, index_tag, old_df):
+        try:
+            logger.info('CSI: Update PE index id({}), name({})'.format(index_id, index_nm))
+            new_df = ak.stock_zh_index_hist_csindex(
+                symbol=index_id,
+                start_date='20180101',
+                end_date=self._latest_trade_day.replace('-', '')
+            )
+            if new_df.empty:
+                return False
+            new_df = new_df.astype({'日期': str})
+            # 过滤掉PE为0或NaN的记录
+            pe_df = new_df[new_df['滚动市盈率'].notna() & (new_df['滚动市盈率'] > 0)].copy()
+            if pe_df.empty:
+                return False
+            pe_df['指数代码'] = index_id
+            pe_df['指数名称'] = index_nm
+            pe_df['标签'] = index_tag
+            pe_df['数据源'] = '中证指数行情'
+            pe_df = pe_df.rename(columns={'滚动市盈率': '市盈率'})
+            pe_df = pe_df[['日期', '指数代码', '指数名称', '标签', '市盈率', '数据源']].set_index('日期')
+            self.store_pe(index_id, old_df, pe_df)
+            return True
+        except Exception as e:
+            logger.error('CSI: query {} failed because of {}'.format(index_id, str(e)))
+            return False
+
+    def _get_price_symbol(self, index_id):
+        """根据指数代码推断行情数据获取方式"""
+        if index_id.startswith('HS') or index_id.startswith('HSC'):
+            return ('hk', index_id)
+        if index_id in ('AU9999', 'SHAU'):
+            return ('gold', None)
+        if index_id == 'M9999':
+            return ('futures', 'M0')
+        if index_id == 'ICEA':
+            return None
+        # 国内指数: 判断交易所前缀
+        if index_id[0] in '05679':
+            return ('cn', 'sh' + index_id)
+        elif index_id[0] in '123':
+            return ('cn', 'sz' + index_id)
+        elif index_id.startswith('H') or index_id.startswith('CN'):
+            return ('cn', 'csi' + index_id)
+        return None
+
+    # 价格降级：对没有PE的指数（商品、债券、海外等），用历史点位计算百分位
+    def update_price(self, index_id, index_nm, index_tag, old_df):
+        try:
+            symbol_info = self._get_price_symbol(index_id)
+            if symbol_info is None:
+                logger.warning('PRICE: No price source for {}'.format(index_id))
+                return False
+
+            source_type, symbol = symbol_info
+            logger.info('PRICE: Update index id({}), name({}), source={}'.format(index_id, index_nm, source_type))
+
+            if source_type == 'cn':
+                price_df = ak.stock_zh_index_daily(symbol=symbol)
+                price_df = price_df[['date', 'close']].rename(columns={'date': '日期', 'close': '收盘'})
+            elif source_type == 'hk':
+                price_df = ak.stock_hk_index_daily_sina(symbol=symbol)
+                price_df = price_df[['date', 'close']].rename(columns={'date': '日期', 'close': '收盘'})
+            elif source_type == 'futures':
+                price_df = ak.futures_zh_daily_sina(symbol=symbol)
+                price_df = price_df[['date', 'close']].rename(columns={'date': '日期', 'close': '收盘'})
+            elif source_type == 'gold':
+                price_df = ak.spot_golden_benchmark_sge()
+                price_df = price_df[['交易时间', '晚盘价']].rename(columns={'交易时间': '日期', '晚盘价': '收盘'})
+            else:
+                return False
+
+            price_df['日期'] = pd.to_datetime(price_df['日期']).dt.strftime('%Y-%m-%d')
+            price_df['指数代码'] = index_id
+            price_df['指数名称'] = index_nm
+            price_df['标签'] = index_tag
+            price_df['数据类型'] = '点位'
+            price_df['数据源'] = '指数行情'
+            price_df = price_df[['日期', '指数代码', '指数名称', '标签', '收盘', '数据类型', '数据源']].set_index('日期')
+            price_df = price_df.rename(columns={'收盘': '点位'})
+            self.store_pe(index_id, old_df, price_df)
+            return True
+        except Exception as e:
+            logger.error('PRICE: query {} failed because of {}'.format(index_id, str(e)))
+            return False
+
     def update_db(self):
         df = pd.read_csv(self._index_file_path)
 
@@ -166,8 +301,12 @@ class Pe(object):
             if not self.update_jq(index_id, index_name, index_tag, old_df):
                 # 其次查找中证官网的估值信息，包括数天的估值信息
                 if not self.update_zz(index_id, index_name, index_tag, old_df):
-                    # 最后查找国证网站的估值信息，仅包含最近交易日的估值信息
-                    self.update_gz(index_id, index_name, index_tag, old_df)
+                    # 再查找国证网站的估值信息，仅包含最近交易日的估值信息
+                    if not self.update_gz(index_id, index_name, index_tag, old_df):
+                        # 再从中证指数历史行情获取PE（覆盖中证系列全量指数）
+                        if not self.update_csindex(index_id, index_name, index_tag, old_df):
+                            # 最后降级为获取指数点位，用于没有PE的指数（商品、债券、海外等）
+                            self.update_price(index_id, index_name, index_tag, old_df)
 
 
 if __name__ == "__main__":
