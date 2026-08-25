@@ -101,12 +101,12 @@ class Pe(object):
                 data_types.append('')
 
         drop_duplicate_df.columns = ['ETF名称', 'ETF代码', '标签', '平均成交额', '指数名称', '指数代码']
-        drop_duplicate_df['市盈率'] = values
-        drop_duplicate_df['市盈率百分位'] = value_percentile
-        drop_duplicate_df['数据类型'] = data_types
+        drop_duplicate_df['估值'] = values
+        drop_duplicate_df['估值百分位'] = value_percentile
+        drop_duplicate_df['估值类型'] = data_types
                 
         def sort_and_save(etf_subset, filename, label):
-            etf_subset = etf_subset.sort_values(by=['市盈率', '市盈率百分位']).reset_index(drop=True)
+            etf_subset = etf_subset.sort_values(by=['估值', '估值百分位']).reset_index(drop=True)
             etf_subset.to_csv(os.path.join(self._mail_path, filename))
             logger.info('{} ETF count: {}'.format(label, len(etf_subset)))
 

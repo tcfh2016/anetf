@@ -105,14 +105,19 @@ class HtmlReporter(object):
         </html>
         '''
 
-    def get_eva_status(self, pe, pe_percentile):
-        if pd.isna(pe) or pd.isna(pe_percentile):
+    def get_eva_status(self, value, percentile, value_type):
+        if pd.isna(percentile):
             return "normal"
 
-        if (pe < 15 or pe_percentile < 0.10):
+        # 市盈率阈值只对PE类型有意义（且需为正值），点位类只看百分位
+        if value_type == 'PE' and pd.notna(value) and 0 < value < 15:
+            return "low"
+        if percentile < 0.10:
             return "low"
 
-        if (pe > 50 or pe_percentile > 0.90):
+        if value_type == 'PE' and pd.notna(value) and value > 50:
+            return "high"
+        if percentile > 0.90:
             return "high"
 
         return "normal"
@@ -129,21 +134,25 @@ class HtmlReporter(object):
                 <th>基金代码</th>
                 <th>指数名称</th>
                 <th>指数代码</th>
-                <th>市盈率</th>
-                <th>市盈率百分位</th>
+                <th>估值类型</th>
+                <th>估值</th>
+                <th>估值百分位</th>
               </tr>
         """.format(series)
 
         for i in range(len(etf)):
-            pe = etf['市盈率'].iloc[i]
-            pe_percentile = etf['市盈率百分位'].iloc[i]
-            eva_status = self.get_eva_status(pe, pe_percentile)
+            value_type = etf['估值类型'].iloc[i]
+            value = etf['估值'].iloc[i]
+            percentile = etf['估值百分位'].iloc[i]
+            eva_status = self.get_eva_status(value, percentile, value_type)
 
-            pe_str = str(round(pe, 2)) if pd.notna(pe) else '-'
-            pe_pct_str = str(round(pe_percentile * 100, 2)) + '%' if pd.notna(pe_percentile) else '-'
+            value_str = str(round(value, 2)) if pd.notna(value) else '-'
+            pct_str = str(round(percentile * 100, 2)) + '%' if pd.notna(percentile) else '-'
+            type_str = value_type if isinstance(value_type, str) and value_type else '-'
 
             etf_table += """
             <tr  class="{}">
+                <td>{}</td>
                 <td>{}</td>
                 <td>{}</td>
                 <td>{}</td>
@@ -156,8 +165,9 @@ class HtmlReporter(object):
                        etf['ETF代码'].iloc[i],
                        etf['指数名称'].iloc[i],
                        str(etf['指数代码'].iloc[i]),
-                       pe_str,
-                       pe_pct_str)
+                       type_str,
+                       value_str,
+                       pct_str)
 
         etf_table += """
         </table>
@@ -175,7 +185,7 @@ class HtmlReporter(object):
         msg['From'] = sender
         msg['To'] = ['lianbch@163.com']
 
-        etf_cols = ['ETF名称', 'ETF代码', '指数名称', '指数代码', '市盈率', '市盈率百分位']
+        etf_cols = ['ETF名称', 'ETF代码', '指数名称', '指数代码', '估值类型', '估值', '估值百分位']
         etf_tables = []
         for key, label in categories:
             csv_path = os.path.join(self._script_path, 'mail', 'etf_{}_sorted.csv'.format(key))
