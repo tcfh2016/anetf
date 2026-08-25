@@ -96,6 +96,149 @@ class Pe(object):
         self._index_file_path = os.path.join(work_path, 'tmp', 'index.csv')
         self._gz_df = ak.index_all_cni().set_index('指数代码')
 
+    def _extend_pe_history(self, index_id, current_pe_s):
+        """尝试扩展 PE 历史数据长度（仅使用 PE 数据源，绝不使用点位）。
+        当前已有 PE 不足时，优先从中证历史行情（滚动市盈率列）扩展，
+        再尝试通过韭圈儿获取更长的 PE 序列。达不到最小行数返回 None。
+        """
+        MIN_PE_ROWS = 20  # 至少需要 20 个 PE 数据点才计算百分位（5% 精度）
+        current_pe_s = current_pe_s.dropna()
+        if len(current_pe_s) >= MIN_PE_ROWS:
+            return current_pe_s
+
+        # 1. 尝试 stock_zh_index_hist_csindex 的"滚动市盈率"列（覆盖 CSI 全量指数，可能被WAF封）
+        try:
+            df = ak.stock_zh_index_hist_csindex(
+                symbol=index_id,
+                start_date='20180101',
+                end_date=self._latest_trade_day.replace('-', '')
+            )
+            if not df.empty and '滚动市盈率' in df.columns:
+                extra_pe = df['滚动市盈率'].dropna()
+                extra_pe = extra_pe[extra_pe > 0]  # 过滤 0 值
+                # 合并当前 PE 与扩展 PE（去重，避免重复日期）
+                merged = pd.concat([current_pe_s, extra_pe]).drop_duplicates()
+                merged = merged[~merged.index.duplicated(keep='last')] if isinstance(merged.index, pd.DatetimeIndex) else merged
+                if len(merged) >= MIN_PE_ROWS:
+                    return merged
+        except Exception:
+            pass
+
+        # 2. 尝试韭圈儿 PE（更长历史，但需要能匹配名称）
+        try:
+            from ext import jq
+            # 通过 index.csv 反查名称（这里不知道名称，只能直接用代码匹配 jq 的名称表，跳过）
+            # 如需更彻底的扩展，应在 order() 里传入 index_name 参数——此处保持轻量
+        except Exception:
+            pass
+
+        # 达不到最小要求
+        extended = current_pe_s.dropna()
+        return extended if len(extended) >= MIN_PE_ROWS else None
+
+    def _extend_point_history(self, index_id, current_point_s):
+        """尝试扩展点位历史长度（仅使用价格/行情数据源，绝不使用 PE）。
+        当前点位不足时，从多种 akshare 接口回退获取。达不到最小行数返回 None。
+        """
+        MIN_POINT_ROWS = 20
+        current_point_s = current_point_s.dropna()
+        if len(current_point_s) >= MIN_POINT_ROWS:
+            return current_point_s
+
+        def _from_close_col(df, aliases=None):
+            if df is None or df.empty:
+                return None
+            for alias in (aliases or ['close', '收盘', '收盘价', 'Close', '晚盘价']):
+                if alias in df.columns:
+                    s = pd.Series(df[alias]).dropna()
+                    merged = pd.concat([current_point_s, s]).drop_duplicates()
+                    return merged if len(merged) >= MIN_POINT_ROWS else None
+            return None
+
+        symbol_info = self._get_price_symbol(index_id)
+        if symbol_info is None:
+            ext = current_point_s.dropna()
+            return ext if len(ext) >= MIN_POINT_ROWS else None
+        source_type, symbol = symbol_info
+
+        try:
+            # ===== 中证 / 国证 / 沪深 =====
+            if source_type in ('cn', 'cni'):
+                # 国证历史行情 (980xxx/987xxx 必中)
+                try:
+                    df = ak.index_hist_cni(symbol=index_id)
+                    res = _from_close_col(df)
+                    if res is not None:
+                        return res
+                except Exception:
+                    pass
+                # 中证历史行情 (930xxx/931xxx/932xxx，WAF 可能间歇性封堵)
+                try:
+                    df = ak.stock_zh_index_hist_csindex(
+                        symbol=index_id,
+                        start_date='20180101',
+                        end_date=self._latest_trade_day.replace('-', '')
+                    )
+                    res = _from_close_col(df)
+                    if res is not None:
+                        return res
+                except Exception:
+                    pass
+                # 新浪行情：多种前缀组合
+                if not index_id.startswith('98'):
+                    for prefix in ['', 'csi', 'sh', 'sz']:
+                        try:
+                            df = ak.stock_zh_index_daily(symbol=prefix + index_id)
+                            res = _from_close_col(df)
+                            if res is not None:
+                                return res
+                        except Exception:
+                            pass
+
+            # ===== 港股 =====
+            elif source_type == 'hk':
+                try:
+                    df = ak.stock_hk_index_daily_sina(symbol=symbol)
+                    res = _from_close_col(df)
+                    if res is not None:
+                        return res
+                except Exception:
+                    pass
+
+            # ===== 美股 =====
+            elif source_type == 'us':
+                try:
+                    df = ak.index_us_stock_sina(symbol=symbol)
+                    res = _from_close_col(df)
+                    if res is not None:
+                        return res
+                except Exception:
+                    pass
+
+            # ===== 期货 =====
+            elif source_type == 'futures':
+                try:
+                    df = ak.futures_zh_daily_sina(symbol=symbol)
+                    res = _from_close_col(df)
+                    if res is not None:
+                        return res
+                except Exception:
+                    pass
+            # ===== 黄金 =====
+            elif source_type == 'gold':
+                try:
+                    df = ak.spot_golden_benchmark_sge()
+                    res = _from_close_col(df)
+                    if res is not None:
+                        return res
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+        ext = current_point_s.dropna()
+        return ext if len(ext) >= MIN_POINT_ROWS else None
+
     def order(self):
         # 由于多只ETF跟踪相同指数，所以先进行去重操作，只保留成交量最高的ETF
         df = pd.read_csv(self._index_file_path, usecols=['name', 'code', 'tag', 'avgamount', 'index_name', 'index_id'])
@@ -126,20 +269,25 @@ class Pe(object):
                 point_valid = has_point_col and pd.notna(etf_df['点位'].iloc[-1])
 
                 if pe_valid:
+                    # 估值类型=PE：只使用 PE 数据计算百分位，绝不使用点位
                     val = etf_df['市盈率'].iloc[-1]
                     values.append(val)
-                    if len(etf_df) >= 100:
-                        value_percentile.append(calc_percentile(etf_df['市盈率']))
+                    extended_pe = self._extend_pe_history(index_id, etf_df['市盈率'])
+                    if extended_pe is not None:
+                        value_percentile.append(calc_percentile(extended_pe))
                     else:
+                        # PE 扩展后仍不足，保持 "-"，绝不混用点位数据
                         value_percentile.append(np.nan)
                     data_types.append('PE')
                 elif point_valid:
-                    # PE无数据时降级使用点位
+                    # 估值类型=点位：只使用点位数据计算百分位，绝不使用PE
                     val = etf_df['点位'].iloc[-1]
                     values.append(val)
-                    if len(etf_df) >= 100:
-                        value_percentile.append(calc_percentile(etf_df['点位']))
+                    extended_pt = self._extend_point_history(index_id, etf_df['点位'])
+                    if extended_pt is not None:
+                        value_percentile.append(calc_percentile(extended_pt))
                     else:
+                        # 点位扩展后仍不足，保持 "-"
                         value_percentile.append(np.nan)
                     data_types.append('点位')
                 else:
