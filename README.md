@@ -96,7 +96,7 @@ cd /home/ubuntu/anetf
 .venv/bin/python run.py --etf-only  # 周维度：只刷新映射
 # 或单步执行（模块方式，必须在工程根目录跑）：
 .venv/bin/python -m src.pe          # 更新估值
-.venv/bin/python -m src.main        # 发送邮件
+.venv/bin/python -m src.main        # 生成报告并发邮件
 ```
 
 Windows（PowerShell）：
