@@ -12,7 +12,7 @@ from typing import Optional, Callable
 
 import pandas as pd
 
-from anetf.datasources.base import DataSource
+from src.datasources.base import DataSource
 
 logger = logging.getLogger(__name__)
 

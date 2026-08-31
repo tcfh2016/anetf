@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-"""anetf —— ETF 估值分析与报告的主包。
+"""src —— ETF 估值分析与报告的主包。
 
 分层结构：
 - models：数据模型（dataclass）

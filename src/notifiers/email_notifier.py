@@ -9,7 +9,7 @@ import logging
 import smtplib
 from email.message import EmailMessage
 
-from anetf.config import MailConfig
+from src.config import MailConfig
 
 logger = logging.getLogger(__name__)
 

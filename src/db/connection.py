@@ -9,7 +9,7 @@ import sqlite3
 import threading
 import logging
 
-from anetf.config import DB_FILE, SCHEMA_FILE
+from src.config import DB_FILE, SCHEMA_FILE
 
 logger = logging.getLogger(__name__)
 

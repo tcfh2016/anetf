@@ -13,7 +13,7 @@ import logging
 
 import requests
 
-from anetf.config import HTTP_TIMEOUT, SOCKET_TIMEOUT
+from src.config import HTTP_TIMEOUT, SOCKET_TIMEOUT
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@
 Date: 2024-05-01
 Desc: 获取ETF列表
 
-阶段 1 重构：常量与 DB 访问下沉到 anetf 包，业务逻辑不变。
+阶段 1 重构：常量与 DB 访问下沉到 src 包，业务逻辑不变。
 """
 
 import logging
@@ -11,10 +11,10 @@ import requests
 import pandas as pd
 import akshare as ak
 
-from anetf.constants import ETF_INDEX_MAPPING_TABLE, ETF_TAG_OVERRIDES
-from anetf.db.connection import Database
-from anetf.db.etf_repo import EtfRepository
-from anetf.datasources import juquaner as jq
+from src.constants import ETF_INDEX_MAPPING_TABLE, ETF_TAG_OVERRIDES
+from src.db.connection import Database
+from src.db.etf_repo import EtfRepository
+from src.datasources import juquaner as jq
 
 logger = logging.getLogger(__name__)
 
@@ -157,9 +157,8 @@ def etf_map2_index(jq_df, gz_df, jk_df, cs_df):
     logger.info('Mapped ETF to index, total: {}'.format(len(etfs)))
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-
+def main():
+    """刷新 ETF→指数映射（周维度）：拉取列表 + 反查指数 + 全量替换 etf 表。"""
     #,指数名称,最新PE,PE分位,最新PB,PB分位,股息率,股息率分位,指数代码,指数开始时间,更新时间
     jq_df = jq.index_value_name_funddb()
 
@@ -173,3 +172,8 @@ if __name__ == "__main__":
     cs_df = ak.index_csindex_all()
 
     etf_map2_index(jq_df, gz_df, jk_df, cs_df)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+    main()

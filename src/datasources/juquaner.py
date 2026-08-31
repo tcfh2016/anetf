@@ -17,8 +17,8 @@ from typing import Optional
 import requests
 import pandas as pd
 
-from anetf.datasources.base import DataSource
-from anetf.constants import FUNDBB_NAME_MAPPING
+from src.datasources.base import DataSource
+from src.constants import FUNDBB_NAME_MAPPING
 
 logger = logging.getLogger(__name__)
 

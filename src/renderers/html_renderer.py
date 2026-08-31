@@ -10,8 +10,8 @@ from typing import List
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from anetf.config import TEMPLATES_DIR
-from anetf.models import CategoryReport, ReportRow
+from src.config import TEMPLATES_DIR
+from src.models import CategoryReport, ReportRow
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@
 Date: 2024-05-02
 Desc: 更新ETF对应的指数的市盈率
 
-阶段 1 重构：DB 访问 / 常量 / 路由函数已下沉到 anetf 包。
+阶段 1 重构：DB 访问 / 常量 / 路由函数已下沉到 src 包。
 阶段 2 重构：5 个 update_* 数据源方法下沉为独立 DataSource 子类，
             ValuationService 通过 _try_fetch_and_store 编排。
 阶段 3 重构：报告生成（order/_extend_*/classify/calc_percentile）下沉到
@@ -16,19 +16,19 @@ import logging
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from anetf.config import MAX_WORKERS
-from anetf.constants import UNSUPPORTED_INDEX_IDS
-from anetf.db.connection import Database
-from anetf.db.etf_repo import EtfRepository
-from anetf.db.valuation_repo import ValuationRepository
-from anetf.datasources.price_symbol import OVERSEAS_SPECIAL_CODES
-from anetf.datasources._http import apply_default_timeout
-from anetf.datasources.calendar import get_latest_trade_day, get_cni_index_list
-from anetf.datasources.juquaner import JuquanerSource
-from anetf.datasources.csindex import CsindexValueSource, CsindexHistSource
-from anetf.datasources.cni import CniSource
-from anetf.datasources.price import PriceSource
-from anetf.datasources.base import DataSource
+from src.config import MAX_WORKERS
+from src.constants import UNSUPPORTED_INDEX_IDS
+from src.db.connection import Database
+from src.db.etf_repo import EtfRepository
+from src.db.valuation_repo import ValuationRepository
+from src.datasources.price_symbol import OVERSEAS_SPECIAL_CODES
+from src.datasources._http import apply_default_timeout
+from src.datasources.calendar import get_latest_trade_day, get_cni_index_list
+from src.datasources.juquaner import JuquanerSource
+from src.datasources.csindex import CsindexValueSource, CsindexHistSource
+from src.datasources.cni import CniSource
+from src.datasources.price import PriceSource
+from src.datasources.base import DataSource
 
 # 全局 HTTP 超时（akshare 内部不传 timeout，需 monkey-patch 兜底）
 apply_default_timeout()
@@ -40,7 +40,7 @@ class ValuationService(object):
     """指数估值更新服务。
 
     阶段 3：只负责 update_db 的数据源编排（顺序、降级、存库）。
-    报告生成已下沉到 anetf.services.report_service.ReportService。
+    报告生成已下沉到 src.services.report_service.ReportService。
     """
 
     def __init__(self, db: Database = None):
@@ -253,8 +253,13 @@ class ValuationService(object):
 Pe = ValuationService
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-    logger.info('pe.py: update_db only (report generation moved to anetf.services.report_service)')
+def main():
+    """更新指数估值（每日编排入口，只做 update_db；报告生成见 main.py）。"""
     service = ValuationService()
     service.update_db()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+    logger.info('pe.py: update_db only (report generation moved to src.services.report_service)')
+    main()

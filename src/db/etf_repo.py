@@ -10,7 +10,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from anetf.db.connection import Database
+from src.db.connection import Database
 
 logger = logging.getLogger(__name__)
 

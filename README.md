@@ -5,8 +5,8 @@
 ## 项目结构
 
 ```
-anetf/
-├── anetf/                      # 主包（分层架构）
+anetf/                          # 工程根
+├── src/                        # 主包（分层架构）
 │   ├── config.py               # 路径 / 阈值 / HTTP 超时 / 邮件配置
 │   ├── constants.py            # 指数映射表、标签、类目等业务常量
 │   ├── models.py               # ReportRow / CategoryReport 数据模型
@@ -26,7 +26,7 @@ anetf/
 ├── etf.py                      # 入口 1：刷新 ETF→指数映射
 ├── pe.py                       # 入口 2：更新指数 PE/点位
 ├── main.py                     # 入口 3：生成报告并发邮件
-├── update_pe.sh                # 编排：pe.py → main.py（含错误短路）
+├── run.py                      # 跨平台编排：组合执行 etf/pe/main（含错误短路）
 ├── config.ini                  # 邮件服务器配置（在 .gitignore 中）
 ├── anetf.db                    # SQLite 数据库（在 .gitignore 中）
 └── requirements.txt
@@ -34,7 +34,7 @@ anetf/
 
 ## 数据存储
 
-所有数据统一落在 `anetf.db`（SQLite，WAL 模式），schema 见 [schema.sql](file:///home/ubuntu/anetf/anetf/db/schema.sql)：
+所有数据统一落在 `anetf.db`（SQLite，WAL 模式），schema 见 [schema.sql](file:///home/ubuntu/anetf/src/db/schema.sql)：
 
 - `etf`：ETF→指数映射（code、name、tag、avgamount、index_id）
 - `index_valuation`：指数估值历史，复合主键 `(index_id, date)` 天然防重，`pe`/`point` 均为可空列，由 `data_type` 区分
@@ -74,9 +74,16 @@ EmailNotifier.send()            →  SMTP 发送
 
 不再依赖任何 CSV 中间产物，`pe.py` 与 `main.py` 之间通过 `anetf.db` 解耦。
 
-### `update_pe.sh` —— 编排脚本
+### `run.py` —— 跨平台编排入口
 
-[update_pe.sh](file:///home/ubuntu/anetf/update_pe.sh) 顺序执行 `pe.py` → `main.py`，前者失败则短路退出，不发空邮件。
+[run.py](file:///home/ubuntu/anetf/run.py) 用纯 Python 编排各步骤（Linux/Windows 通用，已替代原 `update_pe.sh`），任一步骤失败即短路退出，不发空邮件：
+
+```
+python run.py                # 每日默认：更新估值 → 生成报告发邮件
+python run.py --etf          # 周维度：先刷新映射，再更新估值 + 发邮件
+python run.py --pe-only      # 只更新估值
+python run.py --report-only  # 只生成报告并发邮件
+```
 
 ## 执行方式
 
@@ -84,23 +91,40 @@ EmailNotifier.send()            →  SMTP 发送
 
 ```bash
 cd /home/ubuntu/anetf
-.venv/bin/python etf.py        # 刷新映射（每周）
-.venv/bin/python pe.py         # 更新估值（每日）
-.venv/bin/python main.py       # 发送邮件（每日）
-# 或直接跑编排：
-./update_pe.sh
+.venv/bin/python run.py             # 每日：更新估值 + 发邮件
+.venv/bin/python run.py --etf       # 周维度：先刷新映射
+# 或单步执行：
+.venv/bin/python pe.py              # 更新估值
+.venv/bin/python main.py            # 发送邮件
 ```
 
-### 定时任务（cron）
+Windows（PowerShell）：
+
+```powershell
+.venv\Scripts\python.exe run.py
+```
+
+### 定时任务
+
+Linux cron：
 
 ```
 # 每周日凌晨 2 点刷新 ETF 映射
 0 2 * * 0  cd /home/ubuntu/anetf && .venv/bin/python etf.py >> tmp/etf_refresh.log 2>&1
 
 # 每日上午 10 点更新估值并发邮件（日志按天滚动）
-0 10 * * *  cd /home/ubuntu/anetf && .venv/bin/python3 pe.py  >> tmp/pe_$(date +\%Y\%m\%d).log 2>&1 \
-                                      && .venv/bin/python3 main.py >> tmp/mail_$(date +\%Y\%m\%d).log 2>&1
+0 10 * * *  cd /home/ubuntu/anetf && .venv/bin/python run.py >> tmp/run_$(date +\%Y\%m\%d).log 2>&1
 ```
+
+Windows 任务计划程序（taskschd.msc）：
+
+```
+程序或脚本：<项目路径>\.venv\Scripts\pythonw.exe
+参数：      run.py
+起始于：    <项目路径>
+```
+
+> 用 `pythonw.exe` 不弹控制台窗口；如需日志，改用 `python.exe` 并在批处理中重定向输出。
 
 ## 配置
 

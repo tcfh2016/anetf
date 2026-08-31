@@ -2,7 +2,7 @@
 """集中配置：路径、阈值、HTTP 超时、邮件服务器配置。
 
 之前散落在 main.py / pe.py / etf.py 的常量与 config.ini 读取统一收纳于此。
-项目根目录自动推断（anetf 包的父目录），调用方无需传 script_path。
+项目根目录自动推断（src 包的父目录），调用方无需传 script_path。
 """
 
 import os
@@ -13,7 +13,7 @@ from dataclasses import dataclass
 logger = logging.getLogger(__name__)
 
 # ========== 路径 ==========
-PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))   # .../anetf/anetf
+PACKAGE_DIR = os.path.dirname(os.path.realpath(__file__))   # .../anetf/src
 PROJECT_ROOT = os.path.dirname(PACKAGE_DIR)                  # .../anetf
 
 DB_FILE = os.path.join(PROJECT_ROOT, 'anetf.db')
