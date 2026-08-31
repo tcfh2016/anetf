@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/home/ubuntu/anetf/etf.py", line 167, in <module>
+    jq_df = jq.index_value_name_funddb()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anetf/anetf/datasources/juquaner.py", line 258, in index_value_name_funddb
+    temp_df.columns = [
+    ^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anetf/.venv/lib/python3.12/site-packages/pandas/core/generic.py", line 6208, in __setattr__
+    return object.__setattr__(self, name, value)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/properties.pyx", line 69, in pandas._libs.properties.AxisProperty.__set__
+  File "/home/ubuntu/anetf/.venv/lib/python3.12/site-packages/pandas/core/generic.py", line 754, in _set_axis
+    self._mgr.set_axis(axis, labels)
+  File "/home/ubuntu/anetf/.venv/lib/python3.12/site-packages/pandas/core/internals/managers.py", line 273, in set_axis
+    self._validate_set_axis(axis, new_labels)
+  File "/home/ubuntu/anetf/.venv/lib/python3.12/site-packages/pandas/core/internals/managers.py", line 288, in _validate_set_axis
+    raise ValueError(
+ValueError: Length mismatch: Expected axis has 30 elements, new values have 31 elements

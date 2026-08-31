@@ -1,23 +1,40 @@
-import os
+# -*- coding:utf-8 -*-
+"""每日 ETF 海选邮件编排入口。
+
+阶段 3 编排链：
+  ReportService.generate_report()  → 结构化 List[CategoryReport]
+  HtmlRenderer.render()            → HTML 字符串
+  EmailNotifier.send()              → 发送邮件
+
+不再依赖 mail/*.csv，pe.py ↔ mail.py 的 CSV 隐式契约已废除。
+"""
+
 import logging
 import datetime as dt
-import configparser
-import mail.mail as mail
+
+from anetf.config import load_mail_config
+from anetf.db.connection import Database
+from anetf.services.report_service import ReportService
+from anetf.renderers.html_renderer import HtmlRenderer
+from anetf.notifiers.email_notifier import EmailNotifier
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-
-config = configparser.ConfigParser()
 logger = logging.getLogger(__name__)
 
-script_path = os.path.dirname(os.path.realpath(__file__))
-config.read(os.path.join(script_path, 'config.ini'))
 
-logger.info('Mail server configured: {}'.format(config.has_option("MailServer", "server")))
+def main():
+    mail_config = load_mail_config()
+    logger.info('Mail server configured: %s', bool(mail_config.server))
 
-reporter = mail.HtmlReporter(
-    config.get('MailServer', 'server'), 
-    config.get('MailServer', 'port'), 
-    config.get('MailServer', 'authcode'),
-    dt.date.today()-dt.timedelta(days=1),
-    script_path)
-reporter.send_email(config.get('MailList', 'from'))
+    db = Database()
+    try:
+        reports = ReportService(db).generate_report()
+        html = HtmlRenderer().render(reports)
+        subject = 'ETF海选列表(new) - ' + str(dt.date.today() - dt.timedelta(days=1))
+        EmailNotifier(mail_config).send(html, subject)
+    finally:
+        db.close()
+
+
+if __name__ == '__main__':
+    main()

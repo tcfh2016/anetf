@@ -1,0 +1,413 @@
+2026-08-30 10:00:02,362 [INFO] __main__: pe.py: update_db only (report generation moved to anetf.services.report_service)
+2026-08-30 10:00:02,368 [INFO] __main__: update_db: total ETF 832 rows -> dedup to 273 unique indices
+2026-08-30 10:00:03,101 [INFO] anetf.datasources.calendar: latest_trade_day resolved: 2026-08-28
+2026-08-30 10:00:03,156 [INFO] __main__: 13: Skip unsupported index SGXTECH/新交所泛东南亚科技指数
+2026-08-30 10:00:03,175 [INFO] __main__: 16: Skip unsupported index HSHKNE/恒生港股通新经济指数
+2026-08-30 10:00:03,267 [INFO] __main__: 40: Skip unsupported index HSHKAT/恒生港股通汽车主题指数
+2026-08-30 10:00:03,312 [INFO] __main__: 50: Skip unsupported index FARAB/富时阿拉伯指数
+2026-08-30 10:00:03,411 [INFO] __main__: 75: Skip unsupported index HSC/恒生消费指数
+2026-08-30 10:00:03,570 [INFO] __main__: 103: Skip unsupported index TPX/东证指数
+2026-08-30 10:00:03,716 [INFO] __main__: 128: Skip unsupported index HSCPG/恒生A股电网设备指数
+2026-08-30 10:00:03,757 [INFO] __main__: 134: Skip unsupported index HSHGDV/恒生港股通高股息低波动指数
+2026-08-30 10:00:03,821 [INFO] __main__: 144: Skip unsupported index 716567/MSCI中国A股国际通指数
+2026-08-30 10:00:03,878 [INFO] __main__: 155: Skip unsupported index HSHDY/恒生港股通高股息率指数
+2026-08-30 10:00:04,042 [INFO] __main__: 181: Skip unsupported index HSHKCT/恒生港股通中国科技指数
+2026-08-30 10:00:04,281 [INFO] __main__: 215: Skip unsupported index ICEA/易盛能化A
+2026-08-30 10:00:04,712 [INFO] __main__: update_db: 200 skip (cached/unsupported), 73 need fresh fetch
+2026-08-30 10:00:04,713 [INFO] __main__: 30: Update PE index for 987022/港股通互联网
+2026-08-30 10:00:04,713 [INFO] __main__: 38: Update PE index for 987024/港股通消费
+2026-08-30 10:00:04,714 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(987024), local_name(港股通消费), trying funddb_name(港股通消费)
+2026-08-30 10:00:04,713 [INFO] __main__: 46: Update PE index for 930796/全球中国互联网
+2026-08-30 10:00:04,714 [INFO] __main__: 77: Update PE index for FCHI/法国CAC40
+2026-08-30 10:00:04,713 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(987022), local_name(港股通互联网), trying funddb_name(港股通互联网)
+2026-08-30 10:00:04,714 [INFO] __main__: 80: Update PE index for 987006/港股科技
+2026-08-30 10:00:04,717 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(987006), local_name(港股科技), trying funddb_name(港股科技)
+2026-08-30 10:00:04,715 [INFO] __main__: 84: Update PE index for 931456/中国教育
+2026-08-30 10:00:04,715 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930796), local_name(全球中国互联网), trying funddb_name(全球中国互联网)
+2026-08-30 10:00:04,716 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(FCHI), local_name(法国CAC40), trying funddb_name(法国CAC40)
+2026-08-30 10:00:04,717 [INFO] __main__: 114: Update PE index for 746059/MSCI中国A50互联互通
+2026-08-30 10:00:04,721 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(746059), local_name(MSCI中国A50互联互通), trying funddb_name(MSCI中国A50互联互通)
+2026-08-30 10:00:04,718 [INFO] __main__: 116: Update PE index for 987016/港股通红利低波
+2026-08-30 10:00:04,718 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931456), local_name(中国教育), trying funddb_name(中国教育)
+2026-08-30 10:00:04,719 [INFO] __main__: 129: Update PE index for 000696/科创创业AI指数
+2026-08-30 10:00:04,722 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(000696), local_name(科创创业AI指数), trying funddb_name(科创创业AI指数)
+2026-08-30 10:00:04,720 [INFO] __main__: 157: Update PE index for 931409/SHS创新药
+2026-08-30 10:00:04,715 [INFO] __main__: 102: Update PE index for 987003/港股通50
+2026-08-30 10:00:04,724 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(987003), local_name(港股通50), trying funddb_name(港股通50)
+2026-08-30 10:00:04,722 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(987016), local_name(港股通红利低波), trying funddb_name(港股通红利低波)
+2026-08-30 10:00:04,723 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931409), local_name(SHS创新药), trying funddb_name(SHS创新药)
+2026-08-30 10:00:04,720 [INFO] __main__: 154: Update PE index for 931151/光伏产业
+2026-08-30 10:00:04,726 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931151), local_name(光伏产业), trying funddb_name(光伏产业)
+2026-08-30 10:00:05,464 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['港股通互联网']
+2026-08-30 10:00:05,464 [INFO] anetf.datasources.cni: GZ: Update PE index id(987022), name(港股通互联网)
+2026-08-30 10:00:05,487 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['港股科技']
+2026-08-30 10:00:05,488 [INFO] anetf.datasources.cni: GZ: Update PE index id(987006), name(港股科技)
+2026-08-30 10:00:05,511 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['科创创业AI指数']
+2026-08-30 10:00:05,511 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(000696)
+2026-08-30 10:00:05,548 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['港股通消费']
+2026-08-30 10:00:05,554 [INFO] anetf.datasources.cni: GZ: Update PE index id(987024), name(港股通消费)
+2026-08-30 10:00:05,556 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['法国CAC40']
+2026-08-30 10:00:05,557 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(FCHI)
+2026-08-30 10:00:05,567 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['全球中国互联网']
+2026-08-30 10:00:05,568 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930796)
+2026-08-30 10:00:05,570 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['MSCI中国A50互联互通']
+2026-08-30 10:00:05,570 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(746059)
+2026-08-30 10:00:05,590 [ERROR] __main__: 中证指数: fetch failed for FCHI: HTTP Error 404: Not Found
+2026-08-30 10:00:05,591 [ERROR] __main__: 中证指数: fetch failed for 000696: HTTP Error 404: Not Found
+2026-08-30 10:00:05,591 [INFO] anetf.datasources.cni: GZ: Update PE index id(000696), name(科创创业AI指数)
+2026-08-30 10:00:05,591 [INFO] anetf.datasources.cni: GZ: Update PE index id(FCHI), name(法国CAC40)
+2026-08-30 10:00:05,604 [ERROR] __main__: 中证指数: fetch failed for 746059: HTTP Error 404: Not Found
+2026-08-30 10:00:05,605 [INFO] anetf.datasources.cni: GZ: Update PE index id(746059), name(MSCI中国A50互联互通)
+2026-08-30 10:00:05,655 [INFO] __main__: 158: Update PE index for 930726/CS生医
+2026-08-30 10:00:05,655 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930726), local_name(CS生医), trying funddb_name(CS生医)
+2026-08-30 10:00:05,670 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['港股通50']
+2026-08-30 10:00:05,670 [INFO] anetf.datasources.cni: GZ: Update PE index id(987003), name(港股通50)
+2026-08-30 10:00:05,810 [INFO] anetf.datasources.calendar: cni_index_list loaded: 1463 indices
+2026-08-30 10:00:05,811 [WARNING] anetf.datasources.cni: GZ: Update 987022 skipped, PE is NaN in gz_df.
+2026-08-30 10:00:05,811 [INFO] anetf.datasources.price: PRICE: Update index id(987022), name(港股通互联网), source=cni
+2026-08-30 10:00:05,812 [WARNING] anetf.datasources.cni: GZ: Update 987006 skipped, PE is NaN in gz_df.
+2026-08-30 10:00:05,812 [WARNING] anetf.datasources.cni: GZ: Update 987024 skipped, PE is NaN in gz_df.
+2026-08-30 10:00:05,812 [INFO] anetf.datasources.price: PRICE: Update index id(987006), name(港股科技), source=cni
+2026-08-30 10:00:05,812 [WARNING] anetf.datasources.cni: GZ: Update FCHI failed, index not found in gz_df.
+2026-08-30 10:00:05,813 [INFO] anetf.datasources.csindex: CSI: Update PE index id(FCHI), name(法国CAC40)
+2026-08-30 10:00:05,812 [WARNING] anetf.datasources.cni: GZ: Update 746059 failed, index not found in gz_df.
+2026-08-30 10:00:05,814 [INFO] anetf.datasources.csindex: CSI: Update PE index id(746059), name(MSCI中国A50互联互通)
+2026-08-30 10:00:05,812 [INFO] anetf.datasources.price: PRICE: Update index id(987024), name(港股通消费), source=cni
+2026-08-30 10:00:05,812 [WARNING] anetf.datasources.cni: GZ: Update 987003 skipped, PE is NaN in gz_df.
+2026-08-30 10:00:05,812 [WARNING] anetf.datasources.cni: GZ: Update 000696 failed, index not found in gz_df.
+2026-08-30 10:00:05,815 [INFO] anetf.datasources.price: PRICE: Update index id(987003), name(港股通50), source=cni
+2026-08-30 10:00:05,815 [INFO] anetf.datasources.csindex: CSI: Update PE index id(000696), name(科创创业AI指数)
+2026-08-30 10:00:05,922 [ERROR] __main__: 中证指数行情: fetch failed for FCHI: Length mismatch: Expected axis has 0 elements, new values have 16 elements
+2026-08-30 10:00:05,923 [WARNING] anetf.datasources.price: PRICE: No price source for FCHI
+2026-08-30 10:00:05,924 [INFO] __main__: 159: Update PE index for SHAU/上海金
+2026-08-30 10:00:05,924 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(SHAU), local_name(上海金), trying funddb_name(上海金)
+2026-08-30 10:00:05,929 [ERROR] __main__: 中证指数行情: fetch failed for 000696: Length mismatch: Expected axis has 0 elements, new values have 16 elements
+2026-08-30 10:00:05,930 [INFO] anetf.datasources.price: PRICE: Update index id(000696), name(科创创业AI指数), source=cn
+2026-08-30 10:00:05,932 [ERROR] __main__: 中证指数行情: fetch failed for 746059: Length mismatch: Expected axis has 0 elements, new values have 16 elements
+2026-08-30 10:00:05,933 [INFO] anetf.datasources.price: PRICE: Update index id(746059), name(MSCI中国A50互联互通), source=cn
+2026-08-30 10:00:05,949 [INFO] anetf.datasources.price: PRICE: CNI index 987024 loaded 243 rows from index_hist_cni
+2026-08-30 10:00:05,952 [INFO] anetf.datasources.price: PRICE: CNI index 987022 loaded 243 rows from index_hist_cni
+2026-08-30 10:00:05,958 [INFO] __main__: 160: Update PE index for 931866/中证机床
+2026-08-30 10:00:05,959 [INFO] __main__: 162: Update PE index for H30202/软件指数
+2026-08-30 10:00:05,959 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931866), local_name(中证机床), trying funddb_name(中证机床)
+2026-08-30 10:00:05,959 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H30202), local_name(软件指数), trying funddb_name(软件指数)
+2026-08-30 10:00:05,984 [INFO] anetf.datasources.price: PRICE: CNI index 987003 loaded 243 rows from index_hist_cni
+2026-08-30 10:00:05,990 [INFO] __main__: 163: Update PE index for H30007/芯片产业
+2026-08-30 10:00:05,998 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H30007), local_name(芯片产业), trying funddb_name(芯片产业)
+2026-08-30 10:00:06,010 [INFO] anetf.datasources.price: PRICE: CNI index 987006 loaded 243 rows from index_hist_cni
+2026-08-30 10:00:06,022 [INFO] __main__: 164: Update PE index for 931087/科技龙头
+2026-08-30 10:00:06,022 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931087), local_name(科技龙头), trying funddb_name(科技龙头)
+2026-08-30 10:00:06,227 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['SHS创新药']
+2026-08-30 10:00:06,228 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931409)
+2026-08-30 10:00:06,236 [INFO] anetf.datasources.price: PRICE: primary API failed for sh746059, falling back to csindex
+2026-08-30 10:00:06,244 [INFO] __main__: 166: Update PE index for 932365/中证现金流
+2026-08-30 10:00:06,244 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(932365), local_name(中证现金流), trying funddb_name(中证现金流)
+2026-08-30 10:00:06,258 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['光伏产业']
+2026-08-30 10:00:06,258 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931151)
+2026-08-30 10:00:06,272 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['港股通红利低波']
+2026-08-30 10:00:06,272 [INFO] anetf.datasources.cni: GZ: Update PE index id(987016), name(港股通红利低波)
+2026-08-30 10:00:06,282 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中国教育']
+2026-08-30 10:00:06,282 [WARNING] anetf.datasources.cni: GZ: Update 987016 skipped, PE is NaN in gz_df.
+2026-08-30 10:00:06,282 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931456)
+2026-08-30 10:00:06,282 [INFO] anetf.datasources.price: PRICE: Update index id(987016), name(港股通红利低波), source=cni
+2026-08-30 10:00:06,366 [INFO] __main__: 167: Update PE index for 930604/中国互联网30
+2026-08-30 10:00:06,366 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930604), local_name(中国互联网30), trying funddb_name(中国互联网30)
+2026-08-30 10:00:06,367 [INFO] __main__: 169: Update PE index for 930707/中证畜牧
+2026-08-30 10:00:06,367 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930707), local_name(中证畜牧), trying funddb_name(中证畜牧)
+2026-08-30 10:00:06,377 [WARNING] anetf.datasources.price: PRICE: fallback also failed for 746059: Length mismatch: Expected axis has 0 elements, new values have 16 elements
+2026-08-30 10:00:06,382 [INFO] __main__: 170: Update PE index for 931239/港股通汽车
+2026-08-30 10:00:06,383 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931239), local_name(港股通汽车), trying funddb_name(港股通汽车)
+2026-08-30 10:00:06,389 [INFO] __main__: 171: Update PE index for 931643/HKC医药
+2026-08-30 10:00:06,389 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931643), local_name(HKC医药), trying funddb_name(HKC医药)
+2026-08-30 10:00:06,400 [INFO] anetf.datasources.price: PRICE: CNI index 987016 loaded 243 rows from index_hist_cni
+2026-08-30 10:00:06,402 [INFO] __main__: 173: Update PE index for 000811/细分有色
+2026-08-30 10:00:06,402 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(000811), local_name(细分有色), trying funddb_name(细分有色)
+2026-08-30 10:00:06,546 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['上海金']
+2026-08-30 10:00:06,547 [INFO] anetf.datasources.price: PRICE: Update index id(SHAU), name(上海金), source=gold
+2026-08-30 10:00:06,559 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证机床']
+2026-08-30 10:00:06,560 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931866)
+2026-08-30 10:00:06,587 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['软件指数']
+2026-08-30 10:00:06,590 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(H30202)
+2026-08-30 10:00:06,642 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['芯片产业']
+2026-08-30 10:00:06,642 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(H30007)
+2026-08-30 10:00:06,694 [INFO] __main__: 176: Update PE index for 931719/CS电池
+2026-08-30 10:00:06,694 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931719), local_name(CS电池), trying funddb_name(CS电池)
+2026-08-30 10:00:06,699 [INFO] __main__: 177: Update PE index for 931052/国信价值
+2026-08-30 10:00:06,699 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931052), local_name(国信价值), trying funddb_name(国信价值)
+2026-08-30 10:00:06,733 [INFO] __main__: 178: Update PE index for 930632/CS稀金属
+2026-08-30 10:00:06,733 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930632), local_name(CS稀金属), trying funddb_name(CS稀金属)
+2026-08-30 10:00:06,815 [INFO] __main__: 179: Update PE index for 931071/人工智能
+2026-08-30 10:00:06,815 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931071), local_name(人工智能), trying funddb_name(人工智能)
+2026-08-30 10:00:06,919 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['CS生医']
+2026-08-30 10:00:06,920 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930726)
+2026-08-30 10:00:06,948 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中国互联网30']
+2026-08-30 10:00:06,948 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930604)
+2026-08-30 10:00:06,958 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['港股通汽车']
+2026-08-30 10:00:06,958 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931239)
+2026-08-30 10:00:07,000 [INFO] __main__: 180: Update PE index for 931573/HKC科技(CNY)
+2026-08-30 10:00:07,001 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['细分有色']
+2026-08-30 10:00:07,002 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931573), local_name(HKC科技(CNY)), trying funddb_name(HKC科技(CNY))
+2026-08-30 10:00:07,002 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(000811)
+2026-08-30 10:00:07,042 [INFO] __main__: 182: Update PE index for N225/日经225
+2026-08-30 10:00:07,042 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(N225), local_name(日经225), trying funddb_name(日经225)
+2026-08-30 10:00:07,085 [INFO] __main__: 183: Update PE index for 931066/军工龙头
+2026-08-30 10:00:07,085 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931066), local_name(军工龙头), trying funddb_name(军工龙头)
+2026-08-30 10:00:07,105 [INFO] __main__: 186: Update PE index for GDAXI/德国DAX
+2026-08-30 10:00:07,105 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(GDAXI), local_name(德国DAX), trying funddb_name(德国DAX)
+2026-08-30 10:00:07,243 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['CS电池']
+2026-08-30 10:00:07,243 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931719)
+2026-08-30 10:00:07,267 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['国信价值']
+2026-08-30 10:00:07,267 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931052)
+2026-08-30 10:00:07,275 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['科技龙头']
+2026-08-30 10:00:07,275 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931087)
+2026-08-30 10:00:07,337 [INFO] __main__: 191: Update PE index for H11059/工业有色
+2026-08-30 10:00:07,337 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H11059), local_name(工业有色), trying funddb_name(工业有色)
+2026-08-30 10:00:07,354 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证现金流']
+2026-08-30 10:00:07,355 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(932365)
+2026-08-30 10:00:07,370 [INFO] __main__: 193: Update PE index for 987008/港股通科技
+2026-08-30 10:00:07,370 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(987008), local_name(港股通科技), trying funddb_name(港股通科技)
+2026-08-30 10:00:07,406 [INFO] __main__: 194: Update PE index for 950162/科创芯片设计
+2026-08-30 10:00:07,406 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(950162), local_name(科创芯片设计), trying funddb_name(科创芯片设计)
+2026-08-30 10:00:07,468 [INFO] __main__: 195: Update PE index for 930914/中证港股通高股息投资指数
+2026-08-30 10:00:07,468 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930914), local_name(中证港股通高股息投资指数), trying funddb_name(中证港股通高股息投资指数)
+2026-08-30 10:00:07,573 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['日经225']
+2026-08-30 10:00:07,574 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(N225)
+2026-08-30 10:00:07,582 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['HKC科技(CNY)']
+2026-08-30 10:00:07,582 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931573)
+2026-08-30 10:00:07,643 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['HKC医药']
+2026-08-30 10:00:07,643 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931643)
+2026-08-30 10:00:07,645 [ERROR] __main__: 中证指数: fetch failed for N225: HTTP Error 404: Not Found
+2026-08-30 10:00:07,645 [INFO] anetf.datasources.cni: GZ: Update PE index id(N225), name(日经225)
+2026-08-30 10:00:07,645 [WARNING] anetf.datasources.cni: GZ: Update N225 failed, index not found in gz_df.
+2026-08-30 10:00:07,645 [INFO] anetf.datasources.csindex: CSI: Update PE index id(N225), name(日经225)
+2026-08-30 10:00:07,688 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证畜牧']
+2026-08-30 10:00:07,689 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930707)
+2026-08-30 10:00:07,719 [ERROR] __main__: 中证指数行情: fetch failed for N225: Length mismatch: Expected axis has 0 elements, new values have 16 elements
+2026-08-30 10:00:07,722 [WARNING] anetf.datasources.price: PRICE: No price source for N225
+2026-08-30 10:00:07,722 [INFO] __main__: 196: Update PE index for 931594/卫星产业
+2026-08-30 10:00:07,722 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931594), local_name(卫星产业), trying funddb_name(卫星产业)
+2026-08-30 10:00:07,723 [INFO] __main__: 198: Update PE index for H30199/电力指数
+2026-08-30 10:00:07,723 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H30199), local_name(电力指数), trying funddb_name(电力指数)
+2026-08-30 10:00:07,759 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['德国DAX']
+2026-08-30 10:00:07,760 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(GDAXI)
+2026-08-30 10:00:07,762 [INFO] __main__: 199: Update PE index for 000813/细分化工
+2026-08-30 10:00:07,762 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(000813), local_name(细分化工), trying funddb_name(细分化工)
+2026-08-30 10:00:07,790 [ERROR] __main__: 中证指数: fetch failed for GDAXI: HTTP Error 404: Not Found
+2026-08-30 10:00:07,790 [INFO] anetf.datasources.cni: GZ: Update PE index id(GDAXI), name(德国DAX)
+2026-08-30 10:00:07,790 [WARNING] anetf.datasources.cni: GZ: Update GDAXI failed, index not found in gz_df.
+2026-08-30 10:00:07,790 [INFO] anetf.datasources.csindex: CSI: Update PE index id(GDAXI), name(德国DAX)
+2026-08-30 10:00:07,836 [INFO] __main__: 203: Update PE index for CN6052/金属指数
+2026-08-30 10:00:07,836 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(CN6052), local_name(金属指数), trying funddb_name(金属指数)
+2026-08-30 10:00:07,869 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['CS稀金属']
+2026-08-30 10:00:07,870 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930632)
+2026-08-30 10:00:07,904 [ERROR] __main__: 中证指数行情: fetch failed for GDAXI: Length mismatch: Expected axis has 0 elements, new values have 16 elements
+2026-08-30 10:00:07,905 [WARNING] anetf.datasources.price: PRICE: No price source for GDAXI
+2026-08-30 10:00:07,905 [INFO] __main__: 208: Update PE index for H30035/300非银
+2026-08-30 10:00:07,905 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H30035), local_name(300非银), trying funddb_name(300非银)
+2026-08-30 10:00:07,921 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['科创芯片设计']
+2026-08-30 10:00:07,921 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(950162)
+2026-08-30 10:00:07,993 [INFO] __main__: 209: Update PE index for 000922/中证红利
+2026-08-30 10:00:07,993 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(000922), local_name(中证红利), trying funddb_name(中证红利)
+2026-08-30 10:00:08,019 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证港股通高股息投资指数']
+2026-08-30 10:00:08,019 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930914)
+2026-08-30 10:00:08,091 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['人工智能']
+2026-08-30 10:00:08,091 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931071)
+2026-08-30 10:00:08,152 [INFO] __main__: 210: Update PE index for 930965/中证港股通医药卫生综合指数
+2026-08-30 10:00:08,152 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930965), local_name(中证港股通医药卫生综合指数), trying funddb_name(中证港股通医药卫生综合指数)
+2026-08-30 10:00:08,257 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['军工龙头']
+2026-08-30 10:00:08,257 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931066)
+2026-08-30 10:00:08,376 [INFO] __main__: 211: Update PE index for 931865/中证半导
+2026-08-30 10:00:08,376 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931865), local_name(中证半导), trying funddb_name(中证半导)
+2026-08-30 10:00:08,379 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['金属指数']
+2026-08-30 10:00:08,379 [INFO] anetf.datasources.price: PRICE: Update index id(CN6052), name(金属指数), source=cn
+2026-08-30 10:00:08,505 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['港股通科技']
+2026-08-30 10:00:08,505 [INFO] anetf.datasources.cni: GZ: Update PE index id(987008), name(港股通科技)
+2026-08-30 10:00:08,505 [WARNING] anetf.datasources.cni: GZ: Update 987008 skipped, PE is NaN in gz_df.
+2026-08-30 10:00:08,505 [INFO] anetf.datasources.price: PRICE: Update index id(987008), name(港股通科技), source=cni
+2026-08-30 10:00:08,534 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['工业有色']
+2026-08-30 10:00:08,534 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(H11059)
+2026-08-30 10:00:08,586 [INFO] anetf.datasources.price: PRICE: CNI index 987008 loaded 243 rows from index_hist_cni
+2026-08-30 10:00:08,589 [INFO] __main__: 212: Update PE index for 930901/动漫游戏
+2026-08-30 10:00:08,589 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930901), local_name(动漫游戏), trying funddb_name(动漫游戏)
+2026-08-30 10:00:08,598 [INFO] anetf.datasources.price: PRICE: primary API failed for csiCN6052, falling back to csindex
+2026-08-30 10:00:08,662 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证港股通医药卫生综合指数']
+2026-08-30 10:00:08,662 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930965)
+2026-08-30 10:00:08,667 [WARNING] anetf.datasources.price: PRICE: fallback also failed for CN6052: Length mismatch: Expected axis has 0 elements, new values have 16 elements
+2026-08-30 10:00:08,670 [INFO] __main__: 214: Update PE index for 931494/消费电子
+2026-08-30 10:00:08,670 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931494), local_name(消费电子), trying funddb_name(消费电子)
+2026-08-30 10:00:08,871 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['细分化工']
+2026-08-30 10:00:08,871 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(000813)
+2026-08-30 10:00:08,928 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['卫星产业']
+2026-08-30 10:00:08,928 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931594)
+2026-08-30 10:00:08,937 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['电力指数']
+2026-08-30 10:00:08,937 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(H30199)
+2026-08-30 10:00:08,973 [INFO] __main__: 216: Update PE index for 930601/中证软件
+2026-08-30 10:00:08,973 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930601), local_name(中证软件), trying funddb_name(中证软件)
+2026-08-30 10:00:09,043 [INFO] __main__: 217: Update PE index for 930792/中证香港银行投资指数
+2026-08-30 10:00:09,043 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930792), local_name(中证香港银行投资指数), trying funddb_name(中证香港银行投资指数)
+2026-08-30 10:00:09,118 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证红利']
+2026-08-30 10:00:09,118 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(000922)
+2026-08-30 10:00:09,163 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['300非银']
+2026-08-30 10:00:09,163 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(H30035)
+2026-08-30 10:00:09,228 [INFO] __main__: 220: Update PE index for 931643/科创创业50
+2026-08-30 10:00:09,229 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931643), local_name(科创创业50), trying funddb_name(科创创业50)
+2026-08-30 10:00:09,458 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证软件']
+2026-08-30 10:00:09,459 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930601)
+2026-08-30 10:00:09,587 [INFO] __main__: 221: Update PE index for 931271/通信设备主题
+2026-08-30 10:00:09,587 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931271), local_name(通信设备主题), trying funddb_name(通信设备主题)
+2026-08-30 10:00:09,605 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证半导']
+2026-08-30 10:00:09,605 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931865)
+2026-08-30 10:00:09,713 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['动漫游戏']
+2026-08-30 10:00:09,713 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930901)
+2026-08-30 10:00:09,725 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['科创创业50']
+2026-08-30 10:00:09,726 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931643)
+2026-08-30 10:00:09,744 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['消费电子']
+2026-08-30 10:00:09,744 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931494)
+2026-08-30 10:00:09,930 [INFO] __main__: 222: Update PE index for 930713/CS人工智
+2026-08-30 10:00:09,931 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930713), local_name(CS人工智), trying funddb_name(CS人工智)
+2026-08-30 10:00:10,004 [INFO] __main__: 225: Update PE index for 931994/电网设备主题
+2026-08-30 10:00:10,005 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931994), local_name(电网设备主题), trying funddb_name(电网设备主题)
+2026-08-30 10:00:10,090 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证香港银行投资指数']
+2026-08-30 10:00:10,090 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930792)
+2026-08-30 10:00:10,137 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['通信设备主题']
+2026-08-30 10:00:10,137 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931271)
+2026-08-30 10:00:10,220 [INFO] __main__: 227: Update PE index for 931024/中证港股通非银行金融指数
+2026-08-30 10:00:10,220 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931024), local_name(中证港股通非银行金融指数), trying funddb_name(中证港股通非银行金融指数)
+2026-08-30 10:00:10,250 [INFO] __main__: 228: Update PE index for H30178/医疗保健
+2026-08-30 10:00:10,250 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H30178), local_name(医疗保健), trying funddb_name(医疗保健)
+2026-08-30 10:00:10,388 [INFO] __main__: 231: Update PE index for 932000/中证2000
+2026-08-30 10:00:10,388 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(932000), local_name(中证2000), trying funddb_name(中证2000)
+2026-08-30 10:00:10,514 [INFO] __main__: 232: Update PE index for H30269/红利低波
+2026-08-30 10:00:10,514 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H30269), local_name(红利低波), trying funddb_name(红利低波)
+2026-08-30 10:00:10,589 [INFO] __main__: 235: Update PE index for H30590/机器人
+2026-08-30 10:00:10,589 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H30590), local_name(机器人), trying funddb_name(机器人)
+2026-08-30 10:00:10,780 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['医疗保健']
+2026-08-30 10:00:10,781 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(H30178)
+2026-08-30 10:00:10,911 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证2000']
+2026-08-30 10:00:10,911 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(932000)
+2026-08-30 10:00:11,001 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['电网设备主题']
+2026-08-30 10:00:11,001 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931994)
+2026-08-30 10:00:11,066 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['CS人工智']
+2026-08-30 10:00:11,066 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930713)
+2026-08-30 10:00:11,099 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['机器人']
+2026-08-30 10:00:11,100 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(H30590)
+2026-08-30 10:00:11,257 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证港股通非银行金融指数']
+2026-08-30 10:00:11,258 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931024)
+2026-08-30 10:00:11,557 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['红利低波']
+2026-08-30 10:00:11,558 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(H30269)
+2026-08-30 10:00:11,572 [INFO] __main__: 240: Update PE index for 931079/5G通信
+2026-08-30 10:00:11,572 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931079), local_name(5G通信), trying funddb_name(5G通信)
+2026-08-30 10:00:12,582 [INFO] __main__: 245: Update PE index for 931238/SSH黄金股票
+2026-08-30 10:00:12,582 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931238), local_name(SSH黄金股票), trying funddb_name(SSH黄金股票)
+2026-08-30 10:00:12,609 [INFO] __main__: 246: Update PE index for 930909/中证港股通信息指数
+2026-08-30 10:00:12,609 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930909), local_name(中证港股通信息指数), trying funddb_name(中证港股通信息指数)
+2026-08-30 10:00:12,709 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['5G通信']
+2026-08-30 10:00:12,709 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931079)
+2026-08-30 10:00:12,778 [INFO] __main__: 249: Update PE index for 931152/CS创新药
+2026-08-30 10:00:12,778 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931152), local_name(CS创新药), trying funddb_name(CS创新药)
+2026-08-30 10:00:13,113 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证港股通信息指数']
+2026-08-30 10:00:13,114 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930909)
+2026-08-30 10:00:13,347 [ERROR] __main__: 中证指数: fetch failed for 930909: HTTP Error 404: Not Found
+2026-08-30 10:00:13,348 [INFO] anetf.datasources.cni: GZ: Update PE index id(930909), name(中证港股通信息指数)
+2026-08-30 10:00:13,348 [WARNING] anetf.datasources.cni: GZ: Update 930909 failed, index not found in gz_df.
+2026-08-30 10:00:13,348 [INFO] anetf.datasources.csindex: CSI: Update PE index id(930909), name(中证港股通信息指数)
+2026-08-30 10:00:13,605 [INFO] __main__: 250: Update PE index for 931637/HKC互联网
+2026-08-30 10:00:13,605 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931637), local_name(HKC互联网), trying funddb_name(HKC互联网)
+2026-08-30 10:00:13,709 [INFO] anetf.datasources.price: PRICE: Update index id(930909), name(中证港股通信息指数), source=cn
+2026-08-30 10:00:13,789 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['SSH黄金股票']
+2026-08-30 10:00:13,789 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931238)
+2026-08-30 10:00:13,952 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['CS创新药']
+2026-08-30 10:00:13,952 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931152)
+2026-08-30 10:00:13,999 [INFO] __main__: 251: Update PE index for H30184/半导体
+2026-08-30 10:00:13,999 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H30184), local_name(半导体), trying funddb_name(半导体)
+2026-08-30 10:00:14,037 [INFO] __main__: 253: Update PE index for 980086/创新药
+2026-08-30 10:00:14,038 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(980086), local_name(创新药), trying funddb_name(创新药)
+2026-08-30 10:00:14,063 [INFO] anetf.datasources.price: PRICE: primary API failed for sh930909, falling back to csindex
+2026-08-30 10:00:14,225 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['HKC互联网']
+2026-08-30 10:00:14,225 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931637)
+2026-08-30 10:00:14,235 [INFO] __main__: 255: Update PE index for H30533/中国互联网50
+2026-08-30 10:00:14,235 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H30533), local_name(中国互联网50), trying funddb_name(中国互联网50)
+2026-08-30 10:00:14,925 [INFO] __main__: 257: Update PE index for 930793/中证香港证券投资指数
+2026-08-30 10:00:14,925 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(930793), local_name(中证香港证券投资指数), trying funddb_name(中证香港证券投资指数)
+2026-08-30 10:00:15,044 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['半导体']
+2026-08-30 10:00:15,044 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(H30184)
+2026-08-30 10:00:15,083 [INFO] __main__: 258: Update PE index for 987018/港股通创新药
+2026-08-30 10:00:15,084 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(987018), local_name(港股通创新药), trying funddb_name(港股通创新药)
+2026-08-30 10:00:15,151 [INFO] __main__: 261: Update PE index for 931160/通信设备
+2026-08-30 10:00:15,151 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931160), local_name(通信设备), trying funddb_name(通信设备)
+2026-08-30 10:00:15,275 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['创新药']
+2026-08-30 10:00:15,275 [INFO] anetf.datasources.cni: GZ: Update PE index id(980086), name(创新药)
+2026-08-30 10:00:15,275 [WARNING] anetf.datasources.cni: GZ: Update 980086 skipped, PE is NaN in gz_df.
+2026-08-30 10:00:15,275 [INFO] anetf.datasources.price: PRICE: Update index id(980086), name(创新药), source=cni
+2026-08-30 10:00:15,308 [INFO] __main__: 263: Update PE index for 931743/半导体材料设备
+2026-08-30 10:00:15,308 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931743), local_name(半导体材料设备), trying funddb_name(半导体材料设备)
+2026-08-30 10:00:15,414 [INFO] anetf.datasources.price: PRICE: CNI index 980086 loaded 252 rows from index_hist_cni
+2026-08-30 10:00:15,418 [INFO] __main__: 266: Update PE index for AU9999/黄金9999指数
+2026-08-30 10:00:15,418 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(AU9999), local_name(黄金9999指数), trying funddb_name(黄金9999指数)
+2026-08-30 10:00:15,469 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中国互联网50']
+2026-08-30 10:00:15,469 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(H30533)
+2026-08-30 10:00:16,096 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证香港证券投资指数']
+2026-08-30 10:00:16,096 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(930793)
+2026-08-30 10:00:16,118 [ERROR] __main__: 中证指数: fetch failed for 930793: HTTP Error 403: Forbidden
+2026-08-30 10:00:16,118 [INFO] anetf.datasources.cni: GZ: Update PE index id(930793), name(中证香港证券投资指数)
+2026-08-30 10:00:16,118 [WARNING] anetf.datasources.cni: GZ: Update 930793 failed, index not found in gz_df.
+2026-08-30 10:00:16,118 [INFO] anetf.datasources.csindex: CSI: Update PE index id(930793), name(中证香港证券投资指数)
+2026-08-30 10:00:16,133 [ERROR] __main__: 中证指数: fetch failed for H30533: HTTP Error 403: Forbidden
+2026-08-30 10:00:16,134 [INFO] anetf.datasources.cni: GZ: Update PE index id(H30533), name(中国互联网50)
+2026-08-30 10:00:16,134 [WARNING] anetf.datasources.cni: GZ: Update H30533 failed, index not found in gz_df.
+2026-08-30 10:00:16,134 [INFO] anetf.datasources.csindex: CSI: Update PE index id(H30533), name(中国互联网50)
+2026-08-30 10:00:16,271 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['港股通创新药']
+2026-08-30 10:00:16,271 [INFO] anetf.datasources.cni: GZ: Update PE index id(987018), name(港股通创新药)
+2026-08-30 10:00:16,272 [WARNING] anetf.datasources.cni: GZ: Update 987018 skipped, PE is NaN in gz_df.
+2026-08-30 10:00:16,272 [INFO] anetf.datasources.price: PRICE: Update index id(987018), name(港股通创新药), source=cni
+2026-08-30 10:00:16,335 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['通信设备']
+2026-08-30 10:00:16,335 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931160)
+2026-08-30 10:00:16,358 [ERROR] __main__: 中证指数: fetch failed for 931160: HTTP Error 403: Forbidden
+2026-08-30 10:00:16,359 [INFO] anetf.datasources.cni: GZ: Update PE index id(931160), name(通信设备)
+2026-08-30 10:00:16,359 [WARNING] anetf.datasources.cni: GZ: Update 931160 failed, index not found in gz_df.
+2026-08-30 10:00:16,359 [INFO] anetf.datasources.csindex: CSI: Update PE index id(931160), name(通信设备)
+2026-08-30 10:00:16,389 [INFO] anetf.datasources.price: PRICE: CNI index 987018 loaded 243 rows from index_hist_cni
+2026-08-30 10:00:16,392 [INFO] __main__: 270: Update PE index for 931787/港股创新药
+2026-08-30 10:00:16,392 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931787), local_name(港股创新药), trying funddb_name(港股创新药)
+2026-08-30 10:00:16,452 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['半导体材料设备']
+2026-08-30 10:00:16,453 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931743)
+2026-08-30 10:00:16,476 [ERROR] __main__: 中证指数: fetch failed for 931743: HTTP Error 403: Forbidden
+2026-08-30 10:00:16,476 [INFO] anetf.datasources.cni: GZ: Update PE index id(931743), name(半导体材料设备)
+2026-08-30 10:00:16,476 [WARNING] anetf.datasources.cni: GZ: Update 931743 failed, index not found in gz_df.
+2026-08-30 10:00:16,476 [INFO] anetf.datasources.csindex: CSI: Update PE index id(931743), name(半导体材料设备)
+2026-08-30 10:00:16,592 [INFO] __main__: 271: Update PE index for 931790/中韩半导体
+2026-08-30 10:00:16,592 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(931790), local_name(中韩半导体), trying funddb_name(中韩半导体)
+2026-08-30 10:00:16,598 [INFO] __main__: 272: Update PE index for H11014/中证短融
+2026-08-30 10:00:16,598 [INFO] anetf.datasources.juquaner: JQ: Update PE index id(H11014), local_name(中证短融), trying funddb_name(中证短融)
+2026-08-30 10:00:16,639 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['黄金9999指数']
+2026-08-30 10:00:16,639 [INFO] anetf.datasources.price: PRICE: Update index id(AU9999), name(黄金9999指数), source=gold
+2026-08-30 10:00:17,605 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['港股创新药']
+2026-08-30 10:00:17,605 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931787)
+2026-08-30 10:00:17,627 [ERROR] __main__: 中证指数: fetch failed for 931787: HTTP Error 403: Forbidden
+2026-08-30 10:00:17,627 [INFO] anetf.datasources.cni: GZ: Update PE index id(931787), name(港股创新药)
+2026-08-30 10:00:17,628 [WARNING] anetf.datasources.cni: GZ: Update 931787 failed, index not found in gz_df.
+2026-08-30 10:00:17,628 [INFO] anetf.datasources.csindex: CSI: Update PE index id(931787), name(港股创新药)
+2026-08-30 10:00:17,733 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中韩半导体']
+2026-08-30 10:00:17,733 [INFO] anetf.datasources.csindex: ZZ: Update PE index id(931790)
+2026-08-30 10:00:17,757 [ERROR] __main__: 中证指数: fetch failed for 931790: HTTP Error 403: Forbidden
+2026-08-30 10:00:17,757 [INFO] anetf.datasources.cni: GZ: Update PE index id(931790), name(中韩半导体)
+2026-08-30 10:00:17,757 [WARNING] anetf.datasources.cni: GZ: Update 931790 failed, index not found in gz_df.
+2026-08-30 10:00:17,757 [INFO] anetf.datasources.csindex: CSI: Update PE index id(931790), name(中韩半导体)
+2026-08-30 10:00:17,794 [ERROR] anetf.datasources.juquaner: JQ: query failed for all candidates: ['中证短融']
+2026-08-30 10:00:17,794 [INFO] anetf.datasources.price: PRICE: Update index id(H11014), name(中证短融), source=cn
+2026-08-30 10:00:17,977 [INFO] anetf.datasources.price: PRICE: primary API failed for csiH11014, falling back to csindex
+2026-08-30 10:00:18,112 [INFO] anetf.datasources.price: PRICE: Update index id(931790), name(中韩半导体), source=cn
+2026-08-30 10:00:18,239 [INFO] anetf.datasources.price: PRICE: primary API failed for csi931790, falling back to csindex
+2026-08-30 10:00:24,417 [ERROR] __main__: 中证指数: fetch failed for H30035: The read operation timed out
+2026-08-30 10:00:24,417 [INFO] anetf.datasources.cni: GZ: Update PE index id(H30035), name(300非银)
+2026-08-30 10:00:24,417 [WARNING] anetf.datasources.cni: GZ: Update H30035 failed, index not found in gz_df.
+2026-08-30 10:00:24,417 [INFO] anetf.datasources.csindex: CSI: Update PE index id(H30035), name(300非银)
+2026-08-30 10:00:25,029 [ERROR] __main__: 中证指数: fetch failed for 931066: The read operation timed out
+2026-08-30 10:00:25,029 [INFO] anetf.datasources.cni: GZ: Update PE index id(931066), name(军工龙头)
+2026-08-30 10:00:25,029 [WARNING] anetf.datasources.cni: GZ: Update 931066 failed, index not found in gz_df.
+2026-08-30 10:00:25,029 [INFO] anetf.datasources.csindex: CSI: Update PE index id(931066), name(军工龙头)
+2026-08-30 10:00:26,531 [ERROR] __main__: 中证指数: fetch failed for 930713: The read operation timed out
+2026-08-30 10:00:26,531 [INFO] anetf.datasources.cni: GZ: Update PE index id(930713), name(CS人工智)
+2026-08-30 10:00:26,531 [WARNING] anetf.datasources.cni: GZ: Update 930713 failed, index not found in gz_df.
+2026-08-30 10:00:26,532 [INFO] anetf.datasources.csindex: CSI: Update PE index id(930713), name(CS人工智)
+2026-08-30 10:00:26,930 [INFO] __main__: update_db finished: done=73, failed=0

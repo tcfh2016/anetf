@@ -1,0 +1,11 @@
+2026-08-27 10:01:21,286 [INFO] __main__: Mail server configured: True
+2026-08-27 10:01:21,293 [INFO] anetf.services.report_service: ETF number: 832, drop to 261 after remove duplicated ETF, filtered 12 unsupported.
+2026-08-27 10:01:22,101 [INFO] anetf.datasources.calendar: latest_trade_day resolved: 2026-08-26
+2026-08-27 10:01:42,261 [INFO] anetf.services.report_service: 跨境股票 ETF count: 46
+2026-08-27 10:01:42,265 [INFO] anetf.services.report_service: 宽基指数 ETF count: 28
+2026-08-27 10:01:42,274 [INFO] anetf.services.report_service: 行业股票 ETF count: 102
+2026-08-27 10:01:42,279 [INFO] anetf.services.report_service: 主题投资 ETF count: 54
+2026-08-27 10:01:42,282 [INFO] anetf.services.report_service: 策略指数 ETF count: 26
+2026-08-27 10:01:42,284 [INFO] anetf.services.report_service: 商品 ETF count: 4
+2026-08-27 10:01:42,285 [INFO] anetf.services.report_service: 固定收益 ETF count: 1
+2026-08-27 10:01:43,174 [INFO] anetf.notifiers.email_notifier: Email sent successfully.

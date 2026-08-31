@@ -1,0 +1,142 @@
+2026-08-26 10:00:02,430 [INFO] __main__: work_path: /home/ubuntu/anetf
+2026-08-26 10:00:03,677 [INFO] __main__: update_db: total ETF 834 rows -> dedup to 275 unique indices
+2026-08-26 10:00:03,711 [INFO] __main__: 12: Skip unsupported index SGXTECH/新交所泛东南亚科技指数
+2026-08-26 10:00:03,784 [INFO] __main__: 22: Skip unsupported index HSHKNE/恒生港股通新经济指数
+2026-08-26 10:00:03,839 [INFO] __main__: 40: Skip unsupported index HSHKAT/恒生港股通汽车主题指数
+2026-08-26 10:00:03,873 [INFO] __main__: 44: Skip unsupported index FARAB/富时阿拉伯指数
+2026-08-26 10:00:04,021 [INFO] __main__: 72: Skip unsupported index HSC/恒生消费指数
+2026-08-26 10:00:04,233 [INFO] __main__: 101: Skip unsupported index TPX/东证指数
+2026-08-26 10:00:04,458 [INFO] __main__: 129: Skip unsupported index HSHGDV/恒生港股通高股息低波动指数
+2026-08-26 10:00:04,483 [INFO] __main__: 133: Skip unsupported index HSCPG/恒生A股电网设备指数
+2026-08-26 10:00:04,545 [INFO] __main__: 141: Skip unsupported index 716567/MSCI中国A股国际通指数
+2026-08-26 10:00:04,607 [INFO] __main__: 147: Skip unsupported index HSHDY/恒生港股通高股息率指数
+2026-08-26 10:00:04,936 [INFO] __main__: 186: Skip unsupported index HSHKCT/恒生港股通中国科技指数
+2026-08-26 10:00:05,075 [INFO] __main__: 205: Skip unsupported index ICEA/易盛能化A
+2026-08-26 10:00:05,722 [INFO] __main__: update_db: 248 skip (cached/unsupported), 27 need fresh fetch
+2026-08-26 10:00:05,722 [INFO] __main__: 13: Update PE index for 930931/港股通50(HKD)
+2026-08-26 10:00:05,723 [INFO] __main__: 38: Update PE index for 987024/港股通消费
+2026-08-26 10:00:05,723 [INFO] __main__: JQ: Update PE index id(987024), local_name(港股通消费), trying funddb_name(港股通消费)
+2026-08-26 10:00:05,723 [INFO] __main__: 45: Update PE index for 987022/港股通互联网
+2026-08-26 10:00:05,723 [INFO] __main__: JQ: Update PE index id(930931), local_name(港股通50(HKD)), trying funddb_name(港股通50(HKD))
+2026-08-26 10:00:05,724 [INFO] __main__: 54: Update PE index for 930796/全球中国互联网
+2026-08-26 10:00:05,724 [INFO] __main__: JQ: Update PE index id(987022), local_name(港股通互联网), trying funddb_name(港股通互联网)
+2026-08-26 10:00:05,726 [INFO] __main__: JQ: Update PE index id(930796), local_name(全球中国互联网), trying funddb_name(全球中国互联网)
+2026-08-26 10:00:05,726 [INFO] __main__: 81: Update PE index for FCHI/法国CAC40
+2026-08-26 10:00:05,727 [INFO] __main__: 84: Update PE index for 987006/港股科技
+2026-08-26 10:00:05,729 [INFO] __main__: JQ: Update PE index id(987006), local_name(港股科技), trying funddb_name(港股科技)
+2026-08-26 10:00:05,727 [INFO] __main__: 102: Update PE index for 987003/港股通50
+2026-08-26 10:00:05,729 [INFO] __main__: 115: Update PE index for 746059/MSCI中国A50互联互通
+2026-08-26 10:00:05,728 [INFO] __main__: JQ: Update PE index id(FCHI), local_name(法国CAC40), trying funddb_name(法国CAC40)
+2026-08-26 10:00:05,730 [INFO] __main__: 120: Update PE index for 987016/港股通红利低波
+2026-08-26 10:00:05,732 [INFO] __main__: JQ: Update PE index id(746059), local_name(MSCI中国A50互联互通), trying funddb_name(MSCI中国A50互联互通)
+2026-08-26 10:00:05,733 [INFO] __main__: JQ: Update PE index id(987016), local_name(港股通红利低波), trying funddb_name(港股通红利低波)
+2026-08-26 10:00:05,731 [INFO] __main__: 156: Update PE index for SHAU/上海金
+2026-08-26 10:00:05,734 [INFO] __main__: JQ: Update PE index id(SHAU), local_name(上海金), trying funddb_name(上海金)
+2026-08-26 10:00:05,732 [INFO] __main__: JQ: Update PE index id(987003), local_name(港股通50), trying funddb_name(港股通50)
+2026-08-26 10:00:05,731 [INFO] __main__: 144: Update PE index for HSCEI/恒生中国企业指数
+2026-08-26 10:00:05,736 [INFO] __main__: JQ: Update PE index id(HSCEI), local_name(恒生中国企业指数), trying funddb_name(恒生中国企业指数)
+2026-08-26 10:00:05,731 [INFO] __main__: 131: Update PE index for 000696/科创创业AI指数
+2026-08-26 10:00:05,737 [INFO] __main__: JQ: Update PE index id(000696), local_name(科创创业AI指数), trying funddb_name(科创创业AI指数)
+2026-08-26 10:00:06,204 [WARNING] ext.jq: Request to https://api.jiucaishuo.com/v2/guzhi/showcategory failed (attempt 1/2): 500 Server Error: Internal Server Error for url: https://api.jiucaishuo.com/v2/guzhi/showcategory
+2026-08-26 10:00:06,224 [WARNING] ext.jq: Request to https://api.jiucaishuo.com/v2/guzhi/showcategory failed (attempt 1/2): 500 Server Error: Internal Server Error for url: https://api.jiucaishuo.com/v2/guzhi/showcategory
+2026-08-26 10:00:06,645 [ERROR] __main__: JQ: query failed for all candidates: ['全球中国互联网']
+2026-08-26 10:00:06,645 [INFO] __main__: ZZ: Update PE index id(930796)
+2026-08-26 10:00:06,794 [INFO] __main__: 165: Update PE index for 930604/中国互联网30
+2026-08-26 10:00:06,794 [INFO] __main__: JQ: Update PE index id(930604), local_name(中国互联网30), trying funddb_name(中国互联网30)
+2026-08-26 10:00:06,794 [ERROR] __main__: JQ: query failed for all candidates: ['中国互联网30']
+2026-08-26 10:00:06,794 [INFO] __main__: ZZ: Update PE index id(930604)
+2026-08-26 10:00:06,885 [INFO] __main__: 183: Update PE index for DJI/道琼斯工业平均指数
+2026-08-26 10:00:06,885 [INFO] __main__: JQ: Update PE index id(DJI), local_name(道琼斯工业平均指数), trying funddb_name(道琼斯工业指数)
+2026-08-26 10:00:07,083 [INFO] __main__: 187: Update PE index for N225/日经225
+2026-08-26 10:00:07,084 [INFO] __main__: JQ: Update PE index id(N225), local_name(日经225), trying funddb_name(日经225)
+2026-08-26 10:00:07,227 [INFO] __main__: 196: Update PE index for GDAXI/德国DAX
+2026-08-26 10:00:07,234 [INFO] __main__: JQ: Update PE index id(GDAXI), local_name(德国DAX), trying funddb_name(德国DAX)
+2026-08-26 10:00:07,242 [ERROR] __main__: JQ: query failed for all candidates: ['上海金']
+2026-08-26 10:00:07,242 [INFO] __main__: PRICE: Update index id(SHAU), name(上海金), source=gold
+2026-08-26 10:00:07,278 [ERROR] __main__: JQ: query failed for all candidates: ['港股科技']
+2026-08-26 10:00:07,294 [INFO] __main__: GZ: Update PE index id(987006), name(港股科技)
+2026-08-26 10:00:07,318 [WARNING] __main__: GZ: Update 987006 skipped, PE is NaN in gz_df.
+2026-08-26 10:00:07,318 [INFO] __main__: PRICE: Update index id(987006), name(港股科技), source=cni
+2026-08-26 10:00:07,358 [ERROR] __main__: JQ: query failed for all candidates: ['港股通互联网']
+2026-08-26 10:00:07,358 [INFO] __main__: GZ: Update PE index id(987022), name(港股通互联网)
+2026-08-26 10:00:07,361 [WARNING] __main__: GZ: Update 987022 skipped, PE is NaN in gz_df.
+2026-08-26 10:00:07,361 [INFO] __main__: PRICE: Update index id(987022), name(港股通互联网), source=cni
+2026-08-26 10:00:07,366 [ERROR] __main__: JQ: query failed for all candidates: ['港股通消费']
+2026-08-26 10:00:07,366 [INFO] __main__: GZ: Update PE index id(987024), name(港股通消费)
+2026-08-26 10:00:07,367 [WARNING] __main__: GZ: Update 987024 skipped, PE is NaN in gz_df.
+2026-08-26 10:00:07,367 [INFO] __main__: PRICE: Update index id(987024), name(港股通消费), source=cni
+2026-08-26 10:00:07,368 [INFO] __main__: 199: Update PE index for 987008/港股通科技
+2026-08-26 10:00:07,368 [INFO] __main__: JQ: Update PE index id(987008), local_name(港股通科技), trying funddb_name(港股通科技)
+2026-08-26 10:00:07,368 [ERROR] __main__: JQ: query failed for all candidates: ['港股通科技']
+2026-08-26 10:00:07,368 [INFO] __main__: GZ: Update PE index id(987008), name(港股通科技)
+2026-08-26 10:00:07,369 [WARNING] __main__: GZ: Update 987008 skipped, PE is NaN in gz_df.
+2026-08-26 10:00:07,369 [INFO] __main__: PRICE: Update index id(987008), name(港股通科技), source=cni
+2026-08-26 10:00:07,391 [ERROR] __main__: JQ: query failed for all candidates: ['港股通50']
+2026-08-26 10:00:07,392 [INFO] __main__: GZ: Update PE index id(987003), name(港股通50)
+2026-08-26 10:00:07,392 [WARNING] __main__: GZ: Update 987003 skipped, PE is NaN in gz_df.
+2026-08-26 10:00:07,393 [INFO] __main__: PRICE: Update index id(987003), name(港股通50), source=cni
+2026-08-26 10:00:07,406 [ERROR] __main__: JQ: query failed for all candidates: ['港股通红利低波']
+2026-08-26 10:00:07,406 [INFO] __main__: GZ: Update PE index id(987016), name(港股通红利低波)
+2026-08-26 10:00:07,406 [WARNING] __main__: GZ: Update 987016 skipped, PE is NaN in gz_df.
+2026-08-26 10:00:07,406 [INFO] __main__: PRICE: Update index id(987016), name(港股通红利低波), source=cni
+2026-08-26 10:00:07,466 [INFO] __main__: 210: Update PE index for SP500/标准普尔500指数
+2026-08-26 10:00:07,467 [INFO] __main__: JQ: Update PE index id(SP500), local_name(标准普尔500指数), trying funddb_name(标准普尔500指数)
+2026-08-26 10:00:07,467 [ERROR] __main__: JQ: query failed for all candidates: ['标准普尔500指数']
+2026-08-26 10:00:07,467 [INFO] __main__: PRICE: Update index id(SP500), name(标准普尔500指数), source=us
+2026-08-26 10:00:07,479 [INFO] __main__: PRICE: CNI index 987006 loaded 243 rows from index_hist_cni
+2026-08-26 10:00:07,484 [INFO] __main__: 213: Update PE index for NBI/纳斯达克生物科技指数
+2026-08-26 10:00:07,484 [INFO] __main__: JQ: Update PE index id(NBI), local_name(纳斯达克生物科技指数), trying funddb_name(纳斯达克生物科技指数)
+2026-08-26 10:00:07,484 [ERROR] __main__: JQ: query failed for all candidates: ['纳斯达克生物科技指数']
+2026-08-26 10:00:07,484 [INFO] __main__: PRICE: Update index id(NBI), name(纳斯达克生物科技指数), source=us
+2026-08-26 10:00:07,596 [INFO] __main__: 228: Update PE index for HSHCI/恒生医疗保健
+2026-08-26 10:00:07,596 [INFO] __main__: JQ: Update PE index id(HSHCI), local_name(恒生医疗保健), trying funddb_name(恒生医疗保健)
+2026-08-26 10:00:07,612 [INFO] __main__: 235: Update PE index for HSHKBIO/恒生生物科技指数
+2026-08-26 10:00:07,613 [INFO] __main__: JQ: Update PE index id(HSHKBIO), local_name(恒生生物科技指数), trying funddb_name(恒生生物科技指数)
+2026-08-26 10:00:07,613 [ERROR] __main__: JQ: query failed for all candidates: ['恒生生物科技指数']
+2026-08-26 10:00:07,613 [INFO] __main__: PRICE: Update index id(HSHKBIO), name(恒生生物科技指数), source=hk
+2026-08-26 10:00:07,729 [INFO] __main__: 241: Update PE index for NDX/纳斯达克100
+2026-08-26 10:00:07,729 [INFO] __main__: JQ: Update PE index id(NDX), local_name(纳斯达克100), trying funddb_name(纳斯达克100)
+2026-08-26 10:00:07,854 [INFO] __main__: PRICE: CNI index 987003 loaded 243 rows from index_hist_cni
+2026-08-26 10:00:07,857 [INFO] __main__: 250: Update PE index for HSIII/恒生互联网科技业
+2026-08-26 10:00:07,862 [INFO] __main__: JQ: Update PE index id(HSIII), local_name(恒生互联网科技业), trying funddb_name(恒生互联网科技业)
+2026-08-26 10:00:07,882 [INFO] __main__: PRICE: CNI index 987008 loaded 243 rows from index_hist_cni
+2026-08-26 10:00:07,891 [INFO] __main__: 253: Update PE index for 980086/创新药
+2026-08-26 10:00:07,897 [INFO] __main__: JQ: Update PE index id(980086), local_name(创新药), trying funddb_name(创新药)
+2026-08-26 10:00:07,897 [ERROR] __main__: JQ: query failed for all candidates: ['创新药']
+2026-08-26 10:00:07,897 [INFO] __main__: GZ: Update PE index id(980086), name(创新药)
+2026-08-26 10:00:07,897 [WARNING] __main__: GZ: Update 980086 skipped, PE is NaN in gz_df.
+2026-08-26 10:00:07,897 [INFO] __main__: PRICE: Update index id(980086), name(创新药), source=cni
+2026-08-26 10:00:07,910 [INFO] __main__: 257: Update PE index for H30533/中国互联网50
+2026-08-26 10:00:07,918 [INFO] __main__: JQ: Update PE index id(H30533), local_name(中国互联网50), trying funddb_name(中国互联网50)
+2026-08-26 10:00:07,921 [INFO] __main__: 260: Update PE index for 987018/港股通创新药
+2026-08-26 10:00:07,922 [INFO] __main__: JQ: Update PE index id(987018), local_name(港股通创新药), trying funddb_name(港股通创新药)
+2026-08-26 10:00:07,923 [ERROR] __main__: JQ: query failed for all candidates: ['港股通创新药']
+2026-08-26 10:00:07,923 [INFO] __main__: GZ: Update PE index id(987018), name(港股通创新药)
+2026-08-26 10:00:07,923 [WARNING] __main__: GZ: Update 987018 skipped, PE is NaN in gz_df.
+2026-08-26 10:00:07,923 [INFO] __main__: PRICE: Update index id(987018), name(港股通创新药), source=cni
+2026-08-26 10:00:07,928 [INFO] __main__: 268: Update PE index for AU9999/黄金9999指数
+2026-08-26 10:00:07,928 [INFO] __main__: JQ: Update PE index id(AU9999), local_name(黄金9999指数), trying funddb_name(黄金9999指数)
+2026-08-26 10:00:07,928 [ERROR] __main__: JQ: query failed for all candidates: ['黄金9999指数']
+2026-08-26 10:00:07,928 [INFO] __main__: PRICE: Update index id(AU9999), name(黄金9999指数), source=gold
+2026-08-26 10:00:08,001 [ERROR] __main__: JQ: query failed for all candidates: ['科创创业AI指数']
+2026-08-26 10:00:08,002 [INFO] __main__: ZZ: Update PE index id(000696)
+2026-08-26 10:00:08,067 [INFO] __main__: PRICE: CNI index 987024 loaded 243 rows from index_hist_cni
+2026-08-26 10:00:08,234 [ERROR] __main__: ZZ: query 000696 failed because of HTTP Error 404: Not Found
+2026-08-26 10:00:08,244 [INFO] __main__: GZ: Update PE index id(000696), name(科创创业AI指数)
+2026-08-26 10:00:08,244 [WARNING] __main__: Update 000696 failed, index not found in gz_df.
+2026-08-26 10:00:08,244 [INFO] __main__: CSI: Update PE index id(000696), name(科创创业AI指数)
+2026-08-26 10:00:08,314 [ERROR] __main__: CSI: query 000696 failed because of Length mismatch: Expected axis has 0 elements, new values have 16 elements
+2026-08-26 10:00:08,315 [INFO] __main__: PRICE: Update index id(000696), name(科创创业AI指数), source=cn
+2026-08-26 10:00:08,897 [INFO] __main__: PRICE: CNI index 987016 loaded 243 rows from index_hist_cni
+2026-08-26 10:00:08,905 [INFO] __main__: PRICE: CNI index 987022 loaded 243 rows from index_hist_cni
+2026-08-26 10:00:08,952 [INFO] __main__: PRICE: CNI index 980086 loaded 252 rows from index_hist_cni
+2026-08-26 10:00:08,955 [INFO] __main__: PRICE: CNI index 987018 loaded 243 rows from index_hist_cni
+2026-08-26 10:00:08,960 [INFO] __main__: update_db finished: done=27, failed=0
+2026-08-26 10:00:08,972 [INFO] __main__: ETF number: 834, drop to 263 after remove duplicated ETF, filtered 12 unsupported.
+2026-08-26 10:00:10,979 [INFO] __main__: 跨境股票 ETF count: 46
+2026-08-26 10:00:10,982 [INFO] __main__: 宽基指数 ETF count: 28
+2026-08-26 10:00:10,985 [INFO] __main__: 行业股票 ETF count: 104
+2026-08-26 10:00:10,987 [INFO] __main__: 主题投资 ETF count: 53
+2026-08-26 10:00:10,989 [INFO] __main__: 策略指数 ETF count: 27
+2026-08-26 10:00:10,991 [INFO] __main__: 商品 ETF count: 4
+2026-08-26 10:00:10,993 [INFO] __main__: 固定收益 ETF count: 1
