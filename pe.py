@@ -59,6 +59,49 @@ class ValuationService(object):
         )
         self._src_price = PriceSource(latest_trade_day_fn=get_latest_trade_day)
 
+        # 数据源名→实例映射（偏好表路由用；'指数行情' 为点位兜底，不参与 PE 路由）
+        self._source_by_name = {
+            '韭圈儿': self._src_jq,
+            '中证指数': self._src_zz,
+            '国证指数': self._src_gz,
+            '中证指数行情': self._src_csi,
+        }
+        self._preferences = {}
+
+    def _load_preferences(self):
+        """加载指数优先数据源配置到内存。
+        数据来源：index_source_preference 表（由历史扫描脚本生成）。
+        """
+        sql = ("SELECT index_id, preferred_source, fallback_source "
+               "FROM index_source_preference")
+        df = pd.read_sql_query(sql, self._db.connection)
+        self._preferences = {
+            row['index_id']: (row['preferred_source'],
+                              row['fallback_source'] if pd.notna(row['fallback_source']) else None)
+            for _, row in df.iterrows()
+        }
+        logger.info('Loaded source preferences for %d indices', len(self._preferences))
+
+    def _legacy_source_chain(self, index_id: str, index_tag) -> list:
+        """无偏好表记录时（新指数），按旧降级顺序返回数据源名列表。"""
+        is_cni = index_id.startswith('980') or index_id.startswith('987')
+        first_tag = str(index_tag).split('，')[0] if pd.notna(index_tag) else ''
+        is_non_equity = first_tag in ('商品', '债券')
+        is_overseas_code = (
+            index_id.startswith('HS')
+            or index_id in OVERSEAS_SPECIAL_CODES
+        )
+        skip_domestic_pe = is_non_equity or is_overseas_code
+
+        chain = ['韭圈儿']
+        if not skip_domestic_pe and not is_cni:
+            chain.append('中证指数')
+        if not skip_domestic_pe:
+            chain.append('国证指数')
+        if not skip_domestic_pe and not is_cni:
+            chain.append('中证指数行情')
+        return chain
+
     def _try_fetch_and_store(self, source: DataSource, index_id: str,
                              index_name: str, index_tag: str, old_df) -> bool:
         """尝试从 source 拉取并存库，返回是否成功。
@@ -103,14 +146,13 @@ class ValuationService(object):
         - 先对 index_id 去重，避免同一指数（被多只ETF复用）重复请求
         - 对需要真实请求的任务用线程池并发（HTTP IO 密集型，默认 12 线程提速 10x+）
 
-        数据源降级顺序（与阶段 1 行为等价）：
-        1. 韭圈儿 PE（全指数首选）
-        2. 中证指数官网 PE（非跨境/非海外/非国证代码）
-        3. 国证指数 PE 快照（非跨境/非海外）
-        4. 中证指数历史行情 PE（非跨境/非海外/非国证代码）
-        5. 价格降级（点位，仅限无 PE 历史的指数；有 PE 历史时留空待重试，
-           避免点位行锁死 PE 恢复）
+        数据源路由（阶段 4：基于偏好表）：
+        1. 查 index_source_preference 表，按首选源拉取；失败走备选源
+        2. 无偏好记录的新指数：沿用旧降级链（韭圈儿→中证指数→国证→中证指数行情）
+        3. 所有 PE 源失败后：有 PE 历史则留空待重试（避免点位锁死），
+           无 PE 历史则点位兜底
         """
+        self._load_preferences()
         df = self._etf_repo.load_mapping()
 
         # —— Step 1: 按 index_id 去重（和报告生成一样按 avgamount 排序保留最大那行）
@@ -158,29 +200,23 @@ class ValuationService(object):
             try:
                 logger.info('{}: Update PE index for {}/{}'.format(i, index_id, index_name))
 
-                is_cni = index_id.startswith('980') or index_id.startswith('987')
-                first_tag = str(index_tag).split('，')[0] if pd.notna(index_tag) else ''
-                is_non_equity = first_tag in ('商品', '债券')
-                is_overseas_code = (
-                    index_id.startswith('HS')
-                    or index_id in OVERSEAS_SPECIAL_CODES
-                )
-                skip_domestic_pe = is_non_equity or is_overseas_code
+                # 按偏好表路由；无记录时沿用旧降级链
+                pref = self._preferences.get(index_id)
+                if pref is not None:
+                    preferred, fallback = pref
+                    source_names = [preferred] + ([fallback] if fallback else [])
+                else:
+                    source_names = self._legacy_source_chain(index_id, index_tag)
 
-                pe_updated = self._try_fetch_and_store(
-                    self._src_jq, index_id, index_name, index_tag, old_df)
-
-                if not pe_updated and not skip_domestic_pe and not is_cni:
+                pe_updated = False
+                for name in source_names:
+                    source = self._source_by_name.get(name)
+                    if source is None:
+                        continue
                     pe_updated = self._try_fetch_and_store(
-                        self._src_zz, index_id, index_name, index_tag, old_df)
-
-                if not pe_updated and not skip_domestic_pe:
-                    pe_updated = self._try_fetch_and_store(
-                        self._src_gz, index_id, index_name, index_tag, old_df)
-
-                if not pe_updated and not skip_domestic_pe and not is_cni:
-                    pe_updated = self._try_fetch_and_store(
-                        self._src_csi, index_id, index_name, index_tag, old_df)
+                        source, index_id, index_name, index_tag, old_df)
+                    if pe_updated:
+                        break
 
                 if not pe_updated:
                     # 有 PE 历史的指数：PE 源全部失败属瞬时故障，留空待下次运行重试，
