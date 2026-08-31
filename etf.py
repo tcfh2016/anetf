@@ -6,13 +6,11 @@ Desc: 获取ETF列表
 阶段 1 重构：常量与 DB 访问下沉到 anetf 包，业务逻辑不变。
 """
 
-import os
 import logging
 import requests
 import pandas as pd
 import akshare as ak
 
-from anetf.config import PROJECT_ROOT
 from anetf.constants import ETF_INDEX_MAPPING_TABLE, ETF_TAG_OVERRIDES
 from anetf.db.connection import Database
 from anetf.db.etf_repo import EtfRepository
@@ -59,7 +57,6 @@ def etf_info() -> pd.DataFrame:
     df = pd.DataFrame(rows)
     df = df[(df['avgamount'] > 1000) & (df['name'].str.find('债') == -1)].reset_index(drop=True)
     df = fix_etf_tags(df)
-    df.to_csv(os.path.join(PROJECT_ROOT, 'etf.csv'))
 
     return df
 
