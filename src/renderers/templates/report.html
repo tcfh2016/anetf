@@ -19,14 +19,6 @@
         height: 50px;
         text-align: center;
       }
-      article {
-        font-size: 12px;
-        text-align: center;
-        color: blue;
-        width: 900px;
-        margin-left: auto;
-        margin-right: auto;
-      }
       figure {
         background-color: Cornsilk;
         width: 900px;
@@ -41,10 +33,14 @@
       }
       table {
         width: 900px;
+        font-size: 13px;
         text-align: right;
         border-collapse: collapse;
         margin-left: auto;
         margin-right: auto;
+      }
+      th, td {
+        padding: 2px 8px;
       }
       th {
         background-color: Brown;
@@ -76,7 +72,7 @@
           <th>指标类型</th>
           <th>当前值</th>
           <th>历史百分位</th>
-          <th>行情百分位(近5年/总历史)</th>
+          <th>行情百分位</th>
         </tr>
         {% for row in report.rows %}
         <tr class="{{ row | eva_status }}">
@@ -95,7 +91,7 @@
     <section></section>
     {% endfor %}
     <footer>
-      <p>以上信息仅供参考。</p>
+      <p>行情百分位为「近5年/总历史」双口径（仅单值时两口径相同）；以上信息仅供参考。</p>
     </footer>
   </body>
 </html>
