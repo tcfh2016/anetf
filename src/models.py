@@ -42,8 +42,9 @@ class ReportRow:
     """报告中的一行：某只 ETF 的当前估值与历史百分位。
 
     与邮件表头一一对应：ETF名称/ETF代码/指数名称/指数代码/指标类型/当前值/历史百分位/行情百分位。
-    value/percentile/price_percentile 为 None 时表示数据缺失，渲染为 '-'。
-    price_percentile 仅对 PE 类 ETF 计算指数点位的历史百分位；点位类留空。
+    value/percentile/price_percentile/price_percentile_5y 为 None 时表示数据缺失，渲染为 '-'。
+    price_percentile 仅对 PE 类 ETF 计算指数点位的历史百分位（总历史）；点位类留空。
+    price_percentile_5y 为近5年行情百分位；历史不足5年时与 price_percentile 相同。
     """
     etf_name: str
     etf_code: str
@@ -53,6 +54,7 @@ class ReportRow:
     value: Optional[float] = None
     percentile: Optional[float] = None
     price_percentile: Optional[float] = None
+    price_percentile_5y: Optional[float] = None
 
     @property
     def has_data(self) -> bool:

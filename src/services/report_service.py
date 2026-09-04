@@ -47,6 +47,23 @@ def calc_percentile(arr) -> float:
     return (lower.shape[0] / arr.shape[0])
 
 
+def calc_price_percentile_pair(series):
+    """计算 (近5年, 总历史) 行情百分位二元组。
+
+    近5年 = 最后交易日往前推 5 个自然年内的子序列；
+    历史不足 5 年或窗口样本不足 MIN_POINT_ROWS 时，近5年退化为全历史百分位。
+    """
+    full_pct = calc_percentile(series)
+    if not np.isfinite(full_pct):
+        return np.nan, np.nan
+    idx = pd.to_datetime(pd.Index(series.index))
+    cutoff = idx.max() - pd.DateOffset(years=5)
+    recent = series[np.asarray(idx >= cutoff)]
+    if len(recent) < MIN_POINT_ROWS:
+        return full_pct, full_pct
+    return calc_percentile(recent), full_pct
+
+
 class ReportService:
     """生成 ETF 估值分类报告（结构化数据，不落盘）。"""
 
@@ -72,8 +89,9 @@ class ReportService:
 
         # 填充ETF的最新估值和百分位
         # 股票类ETF用市盈率(PE)，非股票类ETF用指数点位
-        # price_percentiles：PE 类额外计算指数点位的历史百分位（行情百分位），点位类留空
-        values, value_percentile, data_types, price_percentiles = [], [], [], []
+        # 行情百分位（近5年/总历史双口径）：PE 类额外计算指数点位百分位，点位类留空
+        values, value_percentile, data_types = [], [], []
+        price_pct_5y, price_pct_full = [], []
         for i in range(len(drop_duplicate_df)):
             index_id = drop_duplicate_df['index_id'].iloc[i].split('.')[0].upper()
             etf_df = self._repo.load_index(index_id)
@@ -96,13 +114,16 @@ class ReportService:
                         # PE 扩展后仍不足，保持 "-"，绝不混用点位数据
                         value_percentile.append(np.nan)
                     data_types.append('PE')
-                    # 行情百分位：优先用库内点位历史（update_db 每日增量维护），
-                    # 库内不足时 _extend_point_history 才回退拉取 akshare
+                    # 行情百分位：只读库内点位历史（update_db 每日增量维护），
+                    # 同时给出 (近5年, 总历史) 两个口径
                     extended_pt = self._extend_point_history(index_id, etf_df['点位'])
                     if extended_pt is not None:
-                        price_percentiles.append(calc_percentile(extended_pt))
+                        p5y, pfull = calc_price_percentile_pair(extended_pt)
+                        price_pct_5y.append(p5y)
+                        price_pct_full.append(pfull)
                     else:
-                        price_percentiles.append(np.nan)
+                        price_pct_5y.append(np.nan)
+                        price_pct_full.append(np.nan)
                 elif has_point:
                     # 估值类型=点位：只使用点位数据计算百分位，绝不使用PE
                     # 行情百分位与主指标百分位同源，按需求留空避免重复
@@ -115,24 +136,28 @@ class ReportService:
                         # 点位扩展后仍不足，保持 "-"
                         value_percentile.append(np.nan)
                     data_types.append('指数点位')
-                    price_percentiles.append(np.nan)
+                    price_pct_5y.append(np.nan)
+                    price_pct_full.append(np.nan)
                 else:
                     # 既无PE也无点位有效数据
                     values.append(np.nan)
                     value_percentile.append(np.nan)
                     data_types.append('')
-                    price_percentiles.append(np.nan)
+                    price_pct_5y.append(np.nan)
+                    price_pct_full.append(np.nan)
             else:
                 values.append(np.nan)
                 value_percentile.append(np.nan)
                 data_types.append('')
-                price_percentiles.append(np.nan)
+                price_pct_5y.append(np.nan)
+                price_pct_full.append(np.nan)
 
         drop_duplicate_df = drop_duplicate_df.copy()
         drop_duplicate_df['当前值'] = values
         drop_duplicate_df['历史百分位'] = value_percentile
         drop_duplicate_df['指标类型'] = data_types
-        drop_duplicate_df['行情百分位'] = price_percentiles
+        drop_duplicate_df['行情百分位(近5年)'] = price_pct_5y
+        drop_duplicate_df['行情百分位(总历史)'] = price_pct_full
 
         # 按分类拆分，分类规则见 classify()
         grouped = {key: [] for key, _ in CATEGORIES}
@@ -153,7 +178,8 @@ class ReportService:
                 row = subset.iloc[i]
                 value = row['当前值']
                 percentile = row['历史百分位']
-                price_pct = row['行情百分位']
+                price_pct = row['行情百分位(总历史)']
+                price_pct_5 = row['行情百分位(近5年)']
                 rows.append(ReportRow(
                     etf_name=row['name'],
                     etf_code=str(row['code']),
@@ -163,6 +189,7 @@ class ReportService:
                     value=None if pd.isna(value) else float(value),
                     percentile=None if pd.isna(percentile) else float(percentile),
                     price_percentile=None if pd.isna(price_pct) else float(price_pct),
+                    price_percentile_5y=None if pd.isna(price_pct_5) else float(price_pct_5),
                 ))
             logger.info('{} ETF count: {}'.format(label, len(rows)))
             reports.append(CategoryReport(key=key, label=label, rows=rows))
