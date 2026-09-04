@@ -35,7 +35,8 @@ class PriceSource(DataSource):
         self._latest_trade_day_fn = latest_trade_day_fn
 
     def fetch(self, index_id: str, index_name: str, index_tag: str) -> Optional[pd.DataFrame]:
-        symbol_info = get_price_symbol(index_id)
+        # 路由表假定输入无后缀（如 H30533.CSI → H30533），入库仍用完整 index_id
+        symbol_info = get_price_symbol(index_id.split('.')[0])
         if symbol_info is None:
             logger.warning('PRICE: No price source for %s', index_id)
             return None
@@ -98,7 +99,7 @@ class PriceSource(DataSource):
             try:
                 end_date = self._latest_trade_day_fn().replace('-', '')
                 price_df = ak.stock_zh_index_hist_csindex(
-                    symbol=index_id, start_date='20180101', end_date=end_date
+                    symbol=index_id.split('.')[0], start_date='20180101', end_date=end_date
                 )
                 if price_df.empty:
                     return None

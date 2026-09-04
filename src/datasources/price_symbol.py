@@ -30,8 +30,8 @@ def get_price_symbol(index_id: str) -> Optional[Tuple[str, Optional[str]]]:
     # 港股指数代码: HSHKAT, HSC, HSHGDV, HSCPG, HSHDY, HSHKCT, HSHCI 等
     if index_id.startswith('HS') or index_id.startswith('HSC'):
         return ('hk', index_id)
-    # 国证指数代码: 987xxx, 980xxx 开头的国证指数
-    if index_id.startswith('987') or index_id.startswith('980'):
+    # 国证指数代码: 987xxx/980xxx/970xxx 及 CN 开头的国证指数
+    if index_id.startswith(('987', '980', '970')) or index_id.startswith('CN'):
         return ('cni', index_id)
     # 中证指数代码: 931xxx 开头的中证指数
     if index_id.startswith('931'):
@@ -51,6 +51,6 @@ def get_price_symbol(index_id: str) -> Optional[Tuple[str, Optional[str]]]:
         return ('cn', 'sh' + index_id)
     elif index_id[0] in '123':
         return ('cn', 'sz' + index_id)
-    elif index_id.startswith('H') or index_id.startswith('CN'):
+    elif index_id.startswith('H'):
         return ('cn', 'csi' + index_id)
     return None
