@@ -27,7 +27,10 @@ MIN_PE_ROWS = 20
 MIN_POINT_ROWS = 20
 
 # 并发拉取指数估值的线程数（HTTP IO 密集型）
-MAX_WORKERS = 12
+# 12 线程会触发对端限流：韭圈儿(funddb)返回 500、新浪行情偶发超时
+# （实测 12 线程下 22 个指数点位回填失败、串行重试全部成功）。
+# 降到 6 并配合各数据源的重试退避（韭圈儿 3 次/2s、PriceSource 2 轮/2s）。
+MAX_WORKERS = 6
 
 # ========== HTTP 超时（秒）==========
 # socket 层兜底，requests Session 层默认值

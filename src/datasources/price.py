@@ -9,6 +9,7 @@ fetch() 返回 点位 类 DataFrame（点位列 + 数据类型='点位'），数
 """
 
 import logging
+import time
 from typing import Optional, Callable
 
 import pandas as pd
@@ -18,6 +19,11 @@ from src.datasources.base import DataSource
 from src.datasources.price_symbol import get_price_symbol
 
 logger = logging.getLogger(__name__)
+
+# 网络拉取失败时的重试轮数与间隔（12 线程并发下 sina 偶发限流/超时，
+# 串行重试验证成功率 100%；无路由的确定性失败不重试）
+FETCH_RETRIES = 2
+RETRY_BACKOFF = 2.0
 
 
 class PriceSource(DataSource):
@@ -38,8 +44,23 @@ class PriceSource(DataSource):
         logger.info('PRICE: Update index id(%s), name(%s), source=%s',
                    index_id, index_name, source_type)
 
-        price_df = self._fetch_by_source(index_id, source_type, symbol)
-        if price_df is None:
+        price_df = None
+        for attempt in range(1, FETCH_RETRIES + 1):
+            try:
+                price_df = self._fetch_by_source(index_id, source_type, symbol)
+            except Exception as e:
+                logger.warning('PRICE: %s attempt %d raised: %s', index_id, attempt, e)
+                price_df = None
+            if price_df is not None and not price_df.empty:
+                if attempt > 1:
+                    logger.info('PRICE: %s succeeded on attempt %d', index_id, attempt)
+                break
+            if attempt < FETCH_RETRIES:
+                logger.info('PRICE: %s attempt %d got no data, retry in %.0fs',
+                            index_id, attempt, RETRY_BACKOFF)
+                time.sleep(RETRY_BACKOFF)
+
+        if price_df is None or price_df.empty:
             return None
 
         price_df['日期'] = pd.to_datetime(price_df['日期']).dt.strftime('%Y-%m-%d')

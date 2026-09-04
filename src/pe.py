@@ -120,16 +120,6 @@ class ValuationService(object):
             logger.error('%s: fetch failed for %s: %s', source.name, index_id, e)
             return False
 
-    def _has_valid_data(self, df):
-        """检查DB文件是否有有效数据（PE或点位至少一列有非空值）"""
-        if df.empty:
-            return False
-        if '市盈率' in df.columns and df['市盈率'].notna().any():
-            return True
-        if '点位' in df.columns and df['点位'].notna().any():
-            return True
-        return False
-
     def _has_pe_history(self, df) -> bool:
         """该指数历史上是否有市盈率数据。
 
@@ -140,6 +130,24 @@ class ValuationService(object):
         return (not df.empty
                 and '市盈率' in df.columns
                 and df['市盈率'].notna().any())
+
+    def _is_fresh(self, old_df, latest_trade_day: str) -> bool:
+        """该指数的本地数据是否已更新到最新交易日（按列判定）。
+
+        - 有 PE 历史的指数（股票类）：最新交易日行需 pe、point 均非空
+          （point 为行情百分位的独立列，缺失则需补拉，不影响 PE 判定）
+        - 无 PE 历史的指数（商品/债券等）：最新交易日行需 point 非空
+        任一列缺失都不算新鲜，避免"点位行锁死 PE 恢复"或 PE 有值但点位欠补。
+        """
+        if self._rewrite or old_df.empty:
+            return False
+        if str(old_df.index[-1]) < latest_trade_day:
+            return False
+        last = old_df.iloc[-1]
+        point_ok = pd.notna(last['点位'])
+        if self._has_pe_history(old_df):
+            return point_ok and pd.notna(last['市盈率'])
+        return point_ok
 
     def update_db(self, max_workers=MAX_WORKERS):
         """更新指数数据库（PE/点位）。
@@ -177,15 +185,10 @@ class ValuationService(object):
                 continue
 
             old_df = self._repo.load_index(index_id)
-            need_update = True
-            if not old_df.empty:
-                if (str(old_df.index[-1]) >= latest_trade_day
-                        and not self._rewrite
-                        and self._has_valid_data(old_df)):
-                    need_update = False
-                    skipped += 1
-
-            if need_update:
+            if self._is_fresh(old_df, latest_trade_day):
+                need_update = False
+                skipped += 1
+            else:
                 tasks.append((i, index_id, index_name, index_tag, old_df))
 
         logger.info('update_db: {} skip (cached/unsupported), {} need fresh fetch'.format(skipped, len(tasks)))
@@ -198,37 +201,55 @@ class ValuationService(object):
         def _update_one(tup):
             i, index_id, index_name, index_tag, old_df = tup
             try:
-                logger.info('{}: Update PE index for {}/{}'.format(i, index_id, index_name))
+                logger.info('{}: Update index for {}/{}'.format(i, index_id, index_name))
 
-                # 按偏好表路由；无记录时沿用旧降级链
-                pref = self._preferences.get(index_id)
-                if pref is not None:
-                    preferred, fallback = pref
-                    source_names = [preferred] + ([fallback] if fallback else [])
-                else:
-                    source_names = self._legacy_source_chain(index_id, index_tag)
+                # 本地列新鲜度：PE 与点位各自独立判定，互不阻塞
+                has_pe_hist = self._has_pe_history(old_df)
+                date_fresh = (not old_df.empty
+                              and str(old_df.index[-1]) >= latest_trade_day)
+                last_row = old_df.iloc[-1] if not old_df.empty else None
+                pe_fresh = (date_fresh and has_pe_hist
+                            and last_row is not None and pd.notna(last_row['市盈率']))
+                point_fresh = (date_fresh and last_row is not None
+                               and pd.notna(last_row['点位']))
 
+                # 1) PE 更新：仅当 PE 不新鲜时按偏好表/降级链拉取
                 pe_updated = False
-                for name in source_names:
-                    source = self._source_by_name.get(name)
-                    if source is None:
-                        continue
-                    pe_updated = self._try_fetch_and_store(
-                        source, index_id, index_name, index_tag, old_df)
-                    if pe_updated:
-                        break
+                if not pe_fresh:
+                    # 按偏好表路由；无记录时沿用旧降级链
+                    pref = self._preferences.get(index_id)
+                    if pref is not None:
+                        preferred, fallback = pref
+                        source_names = [preferred] + ([fallback] if fallback else [])
+                    else:
+                        source_names = self._legacy_source_chain(index_id, index_tag)
 
-                if not pe_updated:
-                    # 有 PE 历史的指数：PE 源全部失败属瞬时故障，留空待下次运行重试，
-                    # 绝不写点位降级行（会被"已缓存"判定锁死 PE 恢复，且污染 PE 序列）
-                    if self._has_pe_history(old_df):
+                    for name in source_names:
+                        source = self._source_by_name.get(name)
+                        if source is None:
+                            continue
+                        pe_updated = self._try_fetch_and_store(
+                            source, index_id, index_name, index_tag, old_df)
+                        if pe_updated:
+                            break
+
+                    if has_pe_hist and not pe_updated:
+                        # PE 源全部失败属瞬时故障：pe 列留空待下次重试。
+                        # point 是独立列，照常更新不会锁死 PE（_is_fresh 要求 pe 非空才跳过）。
                         logger.warning(
                             '%s: all PE sources failed but index has PE history, '
-                            'leave dates empty for retry (no price fallback)', index_id)
-                    else:
-                        # 本就无 PE 的指数（商品/债券/无源主题等）：点位兜底
-                        self._try_fetch_and_store(
-                            self._src_price, index_id, index_name, index_tag, old_df)
+                            'pe column left empty for retry', index_id)
+
+                # 2) 点位更新：点位不新鲜时统一走行情源
+                #    - PE 类指数：补 point 列供行情百分位使用（历史入库后报告零网络请求）
+                #    - 无 PE 历史指数（商品/债券/无源主题等）：点位即主指标，兜底
+                if not point_fresh:
+                    point_ok = self._try_fetch_and_store(
+                        self._src_price, index_id, index_name, index_tag, old_df)
+                    if not point_ok and not has_pe_hist:
+                        logger.warning(
+                            '%s: all sources failed (no PE history, price fetch failed)',
+                            index_id)
 
                 return (index_id, True, None)
             except Exception as e:

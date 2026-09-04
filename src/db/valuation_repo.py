@@ -26,10 +26,18 @@ DB_TO_CN = {
     'source':     '数据源',
 }
 
+# UPSERT：同一 (index_id, date) 已存在时用 COALESCE 互补空缺列，
+# 使 PE 源与点位源写同一日期时互不覆盖（pe/point 各补各的空缺）。
+# data_type/source 冲突时保留先入者（读取侧不依赖这两列）。
 INSERT_SQL = (
-    "INSERT OR IGNORE INTO index_valuation "
+    "INSERT INTO index_valuation "
     "(index_id, date, index_name, tag, pe, point, data_type, source) "
-    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
+    "ON CONFLICT(index_id, date) DO UPDATE SET "
+    "pe = COALESCE(excluded.pe, index_valuation.pe), "
+    "point = COALESCE(excluded.point, index_valuation.point), "
+    "index_name = COALESCE(excluded.index_name, index_valuation.index_name), "
+    "tag = COALESCE(excluded.tag, index_valuation.tag)"
 )
 
 
@@ -75,11 +83,14 @@ class ValuationRepository:
               rewrite: bool = False) -> None:
         """将新估值写入数据库 index_valuation 表。
 
-        - rewrite=False（默认）：只追加 old_df 最新日期之后的新行（INSERT OR IGNORE 防重复）
+        - rewrite=False（默认）：按数据列（市盈率/点位）各自的最新已存日期做增量追加，
+          UPSERT 互补空缺列——PE 源与点位源可分别写入同一日期而不互相覆盖；
+          也能补回"另一列先写入导致本列某日缺失"的空洞。
         - rewrite=True：先删该指数全部旧数据，再全量写入
         线程安全：写库段加 self._db.lock 串行化，保证并发 worker 共享连接安全。
         """
         try:
+            is_pe = '市盈率' in new_df.columns
             if rewrite:
                 diff = new_df
                 self._db.execute(
@@ -87,12 +98,16 @@ class ValuationRepository:
             elif old_df.empty:
                 diff = new_df
             else:
-                # 数据无更新（最新日期相同）
-                if str(old_df.index[-1]) == str(new_df.index[-1]):
-                    return
-                diff = new_df[new_df.index > old_df.index[-1]] if len(new_df) > 1 else new_df
-                if diff.empty:
-                    return
+                # 按本次写入的列取该列在库中的最新日期（另一列的行不阻塞本列补写）
+                col = '市盈率' if is_pe else '点位'
+                have = old_df[col].dropna() if col in old_df.columns else pd.Series(dtype=float)
+                if len(have) == 0:
+                    diff = new_df
+                else:
+                    last_have = have.index[-1]
+                    diff = new_df[new_df.index > last_have] if len(new_df) > 1 else new_df
+                    if diff.empty:
+                        return
 
             logger.debug(diff)
             records = self._to_db_records(index_id, diff)

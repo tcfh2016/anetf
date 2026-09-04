@@ -76,6 +76,7 @@
           <th>指标类型</th>
           <th>当前值</th>
           <th>历史百分位</th>
+          <th>行情百分位</th>
         </tr>
         {% for row in report.rows %}
         <tr class="{{ row | eva_status }}">
@@ -86,6 +87,7 @@
           <td>{{ row.value_type or '-' }}</td>
           <td>{% if row.value is not none %}{{ '%.2f'|format(row.value) }}{% else %}-{% endif %}</td>
           <td>{% if row.percentile is not none %}{{ '%.2f%%'|format(row.percentile * 100) }}{% else %}-{% endif %}</td>
+          <td>{% if row.price_percentile is not none %}{{ '%.2f%%'|format(row.price_percentile * 100) }}{% else %}-{% endif %}</td>
         </tr>
         {% endfor %}
       </table>
