@@ -64,6 +64,76 @@ def calc_price_percentile_pair(series):
     return calc_percentile(recent), full_pct
 
 
+def compute_index_stats(etf_df):
+    """单指数估值计算（报告与 Web 共用的口径，逐行搬运自 generate_report）。
+
+    输入 load_index 返回的 DataFrame（date 索引，市盈率/点位 两列可为 NaN）。
+    类型判定看「历史上是否有 PE」：最新交易日 PE 瞬时缺失（点位已入库）时，
+    仍按 PE 类处理，当前值取最新非空 PE，避免误降级为点位类。
+    返回 dict：当前值/历史百分位/指标类型/行情百分位(近5年)/行情百分位(总历史)。
+    """
+    stats = {
+        '当前值': np.nan,
+        '历史百分位': np.nan,
+        '指标类型': '',
+        '行情百分位(近5年)': np.nan,
+        '行情百分位(总历史)': np.nan,
+    }
+    if etf_df is None or etf_df.empty:
+        return stats
+
+    has_pe = etf_df['市盈率'].notna().any()
+    has_point = etf_df['点位'].notna().any()
+
+    if has_pe:
+        # 估值类型=PE：只使用 PE 数据计算百分位，绝不使用点位数据
+        stats['当前值'] = etf_df['市盈率'].dropna().iloc[-1]
+        extended_pe = _extend_pe_history(etf_df['市盈率'])
+        if extended_pe is not None:
+            stats['历史百分位'] = calc_percentile(extended_pe)
+        # PE 扩展后仍不足，保持 "-"，绝不混用点位数据
+        stats['指标类型'] = 'PE'
+        # 行情百分位：只读库内点位历史（update_db 每日增量维护），
+        # 同时给出 (近5年, 总历史) 两个口径
+        extended_pt = _extend_point_history(etf_df['点位'])
+        if extended_pt is not None:
+            p5y, pfull = calc_price_percentile_pair(extended_pt)
+            stats['行情百分位(近5年)'] = p5y
+            stats['行情百分位(总历史)'] = pfull
+    elif has_point:
+        # 估值类型=点位：只使用点位数据计算百分位，绝不使用PE
+        # 行情百分位与主指标百分位同源，按需求留空避免重复
+        stats['当前值'] = etf_df['点位'].dropna().iloc[-1]
+        extended_pt = _extend_point_history(etf_df['点位'])
+        if extended_pt is not None:
+            stats['历史百分位'] = calc_percentile(extended_pt)
+        # 点位扩展后仍不足，保持 "-"
+        stats['指标类型'] = '指数点位'
+    # 既无PE也无点位有效数据时保持初始 NaN/''
+
+    return stats
+
+
+def _extend_pe_history(current_pe_s):
+    """返回库内 PE 序列（去空值）；不足 MIN_PE_ROWS 返回 None。
+
+    报告/Web 阶段只读库、不发网络请求——PE 历史由 update_db 每日增量维护，
+    不足时百分位显示 '-' 而非现场拉取（现场拉取串行且不落库，曾导致报告耗时 90s+）。
+    """
+    pe_s = current_pe_s.dropna()
+    return pe_s if len(pe_s) >= MIN_PE_ROWS else None
+
+
+def _extend_point_history(current_point_s):
+    """返回库内点位序列（去空值）；不足 MIN_POINT_ROWS 返回 None。
+
+    报告/Web 阶段只读库、不发网络请求——点位历史由 update_db 每日增量维护
+    （PE 类指数也回填 point 列），不足时行情百分位显示 '-'。
+    """
+    pt_s = current_point_s.dropna()
+    return pt_s if len(pt_s) >= MIN_POINT_ROWS else None
+
+
 class ReportService:
     """生成 ETF 估值分类报告（结构化数据，不落盘）。"""
 
@@ -87,77 +157,19 @@ class ReportService:
                         len(df), len(drop_duplicate_df),
                         before_filter - len(drop_duplicate_df)))
 
-        # 填充ETF的最新估值和百分位
-        # 股票类ETF用市盈率(PE)，非股票类ETF用指数点位
-        # 行情百分位（近5年/总历史双口径）：PE 类额外计算指数点位百分位，点位类留空
-        values, value_percentile, data_types = [], [], []
-        price_pct_5y, price_pct_full = [], []
+        # 填充ETF的最新估值和百分位（单指数计算走 compute_index_stats，
+        # 与 Web 快照共用同一口径）
+        stat_cols = ['当前值', '历史百分位', '指标类型',
+                     '行情百分位(近5年)', '行情百分位(总历史)']
+        for col in stat_cols:
+            # 指标类型是字符串列，其余为数值列
+            drop_duplicate_df[col] = '' if col == '指标类型' else np.nan
         for i in range(len(drop_duplicate_df)):
             index_id = drop_duplicate_df['index_id'].iloc[i].split('.')[0].upper()
             etf_df = self._repo.load_index(index_id)
-
-            if not etf_df.empty:
-                # load_index 总是返回 市盈率/点位 两列（缺值为 NaN）
-                # 类型判定看"历史上是否有 PE"：最新交易日 PE 瞬时缺失（点位已入库）时，
-                # 仍按 PE 类处理，当前值取最新非空 PE，避免误降级为点位类
-                has_pe = etf_df['市盈率'].notna().any()
-                has_point = etf_df['点位'].notna().any()
-
-                if has_pe:
-                    # 估值类型=PE：只使用 PE 数据计算百分位，绝不使用点位数据
-                    val = etf_df['市盈率'].dropna().iloc[-1]
-                    values.append(val)
-                    extended_pe = self._extend_pe_history(index_id, etf_df['市盈率'])
-                    if extended_pe is not None:
-                        value_percentile.append(calc_percentile(extended_pe))
-                    else:
-                        # PE 扩展后仍不足，保持 "-"，绝不混用点位数据
-                        value_percentile.append(np.nan)
-                    data_types.append('PE')
-                    # 行情百分位：只读库内点位历史（update_db 每日增量维护），
-                    # 同时给出 (近5年, 总历史) 两个口径
-                    extended_pt = self._extend_point_history(index_id, etf_df['点位'])
-                    if extended_pt is not None:
-                        p5y, pfull = calc_price_percentile_pair(extended_pt)
-                        price_pct_5y.append(p5y)
-                        price_pct_full.append(pfull)
-                    else:
-                        price_pct_5y.append(np.nan)
-                        price_pct_full.append(np.nan)
-                elif has_point:
-                    # 估值类型=点位：只使用点位数据计算百分位，绝不使用PE
-                    # 行情百分位与主指标百分位同源，按需求留空避免重复
-                    val = etf_df['点位'].dropna().iloc[-1]
-                    values.append(val)
-                    extended_pt = self._extend_point_history(index_id, etf_df['点位'])
-                    if extended_pt is not None:
-                        value_percentile.append(calc_percentile(extended_pt))
-                    else:
-                        # 点位扩展后仍不足，保持 "-"
-                        value_percentile.append(np.nan)
-                    data_types.append('指数点位')
-                    price_pct_5y.append(np.nan)
-                    price_pct_full.append(np.nan)
-                else:
-                    # 既无PE也无点位有效数据
-                    values.append(np.nan)
-                    value_percentile.append(np.nan)
-                    data_types.append('')
-                    price_pct_5y.append(np.nan)
-                    price_pct_full.append(np.nan)
-            else:
-                values.append(np.nan)
-                value_percentile.append(np.nan)
-                data_types.append('')
-                price_pct_5y.append(np.nan)
-                price_pct_full.append(np.nan)
-
-        drop_duplicate_df = drop_duplicate_df.copy()
-        drop_duplicate_df['当前值'] = values
-        drop_duplicate_df['历史百分位'] = value_percentile
-        drop_duplicate_df['指标类型'] = data_types
-        drop_duplicate_df['行情百分位(近5年)'] = price_pct_5y
-        drop_duplicate_df['行情百分位(总历史)'] = price_pct_full
+            stats = compute_index_stats(etf_df)
+            for col in stat_cols:
+                drop_duplicate_df.iat[i, drop_duplicate_df.columns.get_loc(col)] = stats[col]
 
         # 按分类拆分，分类规则见 classify()
         grouped = {key: [] for key, _ in CATEGORIES}
@@ -195,21 +207,3 @@ class ReportService:
             reports.append(CategoryReport(key=key, label=label, rows=rows))
 
         return reports
-
-    def _extend_pe_history(self, index_id, current_pe_s):
-        """返回库内 PE 序列（去空值）；不足 MIN_PE_ROWS 返回 None。
-
-        报告阶段只读库、不发网络请求——PE 历史由 update_db 每日增量维护，
-        不足时百分位显示 '-' 而非现场拉取（现场拉取串行且不落库，曾导致报告耗时 90s+）。
-        """
-        pe_s = current_pe_s.dropna()
-        return pe_s if len(pe_s) >= MIN_PE_ROWS else None
-
-    def _extend_point_history(self, index_id, current_point_s):
-        """返回库内点位序列（去空值）；不足 MIN_POINT_ROWS 返回 None。
-
-        报告阶段只读库、不发网络请求——点位历史由 update_db 每日增量维护
-        （PE 类指数也回填 point 列），不足时行情百分位显示 '-'。
-        """
-        pt_s = current_point_s.dropna()
-        return pt_s if len(pt_s) >= MIN_POINT_ROWS else None

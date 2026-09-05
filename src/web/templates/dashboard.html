@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}首页 - ETF 估值查询{% endblock %}
+{% block content %}
+<h2>仪表盘</h2>
+
+<section class="cards">
+  <div class="card">
+    <div class="card-num">{{ data.etf_count }}</div>
+    <div class="card-label">入库 ETF</div>
+  </div>
+  <div class="card">
+    <div class="card-num">{{ data.index_count }}</div>
+    <div class="card-label">跟踪指数</div>
+  </div>
+  <div class="card">
+    <div class="card-num">{{ data.latest_date or '-' }}</div>
+    <div class="card-label">数据最新日期</div>
+  </div>
+  <div class="card">
+    <div class="card-num low-text">{{ data.low_count }}</div>
+    <div class="card-label">低估指数（百分位&lt;20%）</div>
+  </div>
+</section>
+
+<h2>板块估值热力图</h2>
+<p class="hint">格子颜色 = 该类指数历史百分位的均值（绿=便宜，红=贵）。</p>
+<section class="heatmap">
+  {% for h in data.heatmap %}
+  <a class="heat-cell" href="{{ url_for('etfs', category=h.key) }}"
+     style="background: {{ h.avg_percentile | pct_color }}">
+    <span class="heat-label">{{ h.label }}</span>
+    <span class="heat-value">{{ h.avg_percentile | pct(1) }}</span>
+    <span class="heat-count">{{ h.count }} 个指数</span>
+  </a>
+  {% endfor %}
+</section>
+
+<h2>低估推荐榜</h2>
+<p class="hint">规则：主百分位&lt;20% + 排除负 PE + 代表 ETF 日均成交额不低于全市场中位数；按百分位升序取前 20。</p>
+{% if data.recommend %}
+<table>
+  <tr>
+    <th>指数名称</th><th>指数代码</th><th>分类</th><th>主百分位</th>
+    <th>推荐 ETF</th><th>ETF 代码</th><th>推荐理由</th><th>操作</th>
+  </tr>
+  {% for r in data.recommend %}
+  <tr class="low">
+    <td class="text-left"><a href="{{ url_for('index_detail', index_id=r.index_id) }}">{{ r.index_name or '-' }}</a></td>
+    <td>{{ r.index_id }}</td>
+    <td>{{ (categories | selectattr('0', 'equalto', r.category) | list | first)[1] if r.category else '-' }}</td>
+    <td>{{ r.percentile | pct }}</td>
+    <td class="text-left">{{ r.etf.name if r.etf else '-' }}</td>
+    <td>{{ r.etf.code if r.etf else '-' }}</td>
+    <td class="text-left reason">{{ r.reason }}</td>
+    <td><button class="watch-btn" data-code="{{ r.etf.code if r.etf else '' }}">☆ 关注</button></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>暂无满足条件的推荐。</p>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='watch.js') }}?v=20260905"></script>
+{% endblock %}

@@ -6,6 +6,7 @@
 """
 
 import logging
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -56,6 +57,32 @@ class ValuationRepository:
         df = pd.read_sql_query(sql, self._db.connection, params=(index_id,))
         df = df.rename(columns=DB_TO_CN)
         return df.set_index('date')
+
+    def latest_date(self) -> Optional[str]:
+        """库内最新交易日（Web 快照缓存 key）；空库返回 None。"""
+        row = self._db.connection.execute(
+            "SELECT MAX(date) FROM index_valuation").fetchone()
+        return row[0] if row and row[0] else None
+
+    def count_indices(self) -> int:
+        """库内不重复指数个数（Web 仪表盘统计卡片用）。"""
+        row = self._db.connection.execute(
+            "SELECT COUNT(DISTINCT index_id) FROM index_valuation").fetchone()
+        return row[0] if row else 0
+
+    def list_indices(self) -> pd.DataFrame:
+        """库内全部指数的概况（指数/名称/标签/最新日期/PE行数/点位行数）。
+
+        Web 仪表盘用：一次查询替代逐指数 load_index，只取概况不取序列。
+        """
+        sql = ("SELECT index_id, "
+               "MAX(index_name) AS index_name, "
+               "MAX(tag) AS tag, "
+               "MAX(date) AS latest_date, "
+               "SUM(CASE WHEN pe IS NOT NULL THEN 1 ELSE 0 END) AS pe_rows, "
+               "SUM(CASE WHEN point IS NOT NULL THEN 1 ELSE 0 END) AS point_rows "
+               "FROM index_valuation GROUP BY index_id ORDER BY index_id")
+        return pd.read_sql_query(sql, self._db.connection)
 
     def _to_db_records(self, index_id: str, diff: pd.DataFrame):
         """把 update_* 产出的 DataFrame（PE 类或点位类）转为统一 DB schema 的元组列表。

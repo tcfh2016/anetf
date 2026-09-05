@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}关注列表 - ETF 估值查询{% endblock %}
+{% block content %}
+<h2>关注列表 <span class="hint">共 {{ rows | length }} 只</span></h2>
+
+{% if rows %}
+<table id="watchTable">
+  <tr>
+    <th>基金名称</th><th>基金代码</th><th>指数名称</th>
+    <th>指标类型</th><th>当前值</th><th>历史百分位</th><th>状态</th>
+    <th>备注</th><th>低阈值</th><th>高阈值</th><th>操作</th>
+  </tr>
+  {% for w in rows %}
+  <tr data-code="{{ w.code }}">
+    <td class="text-left">{{ w.name or w.code }}</td>
+    <td>{{ w.code }}</td>
+    <td class="text-left">
+      {% if w.index_id %}<a href="{{ url_for('index_detail', index_id=w.index_id) }}">{{ w.index_name or '-' }}</a>
+      {% else %}-{% endif %}
+    </td>
+    <td>{{ w.stats.value_type if w.stats else '-' }}</td>
+    <td>{{ w.stats.value | num if w.stats else '-' }}</td>
+    <td>{{ w.stats.percentile | pct if w.stats else '-' }}</td>
+    <td>
+      {% if w.stats and w.stats.percentile is not none %}
+        {% if w.alert_low is not none and w.stats.percentile < w.alert_low %}
+          <span class="status-low">低估可买</span>
+        {% elif w.alert_high is not none and w.stats.percentile > w.alert_high %}
+          <span class="status-high">高估可卖</span>
+        {% else %}正常{% endif %}
+      {% else %}-{% endif %}
+    </td>
+    <td><input class="w-note" value="{{ w.note or '' }}" placeholder="备注"></td>
+    <td><input class="w-low" type="number" step="0.01" min="0" max="1"
+               value="{{ '%.2f'|format(w.alert_low) if w.alert_low is not none else '' }}" placeholder="如 0.2"></td>
+    <td><input class="w-high" type="number" step="0.01" min="0" max="1"
+               value="{{ '%.2f'|format(w.alert_high) if w.alert_high is not none else '' }}" placeholder="如 0.8"></td>
+    <td>
+      <button class="save-btn">保存</button>
+      <button class="remove-btn">删除</button>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+<p class="hint">阈值含义：历史百分位低于「低阈值」标记「低估可买」，高于「高阈值」标记「高估可卖」；留空则只展示不判断。预警邮件推送在二期上线。</p>
+{% else %}
+<p class="empty">还没有关注的 ETF。去 <a href="{{ url_for('etfs') }}">ETF 列表</a> 点「☆ 关注」添加。</p>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='watch.js') }}?v=20260905"></script>
+{% endblock %}

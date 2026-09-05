@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}ETF 列表 - ETF 估值查询{% endblock %}
+{% block content %}
+<h2>ETF 列表 <span class="hint">共 {{ total }} 只</span></h2>
+
+<form class="filterbar" method="get" action="{{ url_for('etfs') }}">
+  <input type="search" name="q" value="{{ q }}" placeholder="代码 / 名称 / 指数名">
+  <select name="category">
+    <option value="">全部分类</option>
+    {% for key, label in categories %}
+    <option value="{{ key }}" {% if category == key %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">筛选</button>
+  {% if q or category %}<a class="clear-link" href="{{ url_for('etfs') }}">清空</a>{% endif %}
+</form>
+
+{% if rows %}
+<table>
+  <tr>
+    <th>基金名称</th><th>基金代码</th><th>标签</th><th>指数名称</th><th>指数代码</th>
+    <th>指标类型</th><th>当前值</th><th>历史百分位</th><th>行情百分位</th><th>日均成交(万)</th><th>操作</th>
+  </tr>
+  {% for e in rows %}
+  <tr class="{{ e.stats | eva_status }}">
+    <td class="text-left">{{ e.name }}</td>
+    <td>{{ e.code }}</td>
+    <td class="text-left tag-cell">{{ e.tag or '-' }}</td>
+    <td class="text-left">
+      {% if e.index_id %}<a href="{{ url_for('index_detail', index_id=e.index_id) }}">{{ e.index_name or '-' }}</a>
+      {% else %}-{% endif %}
+    </td>
+    <td>{{ e.index_id or '-' }}</td>
+    <td>{{ e.stats.value_type or '-' }}</td>
+    <td>{{ e.stats.value | num }}</td>
+    <td>{{ e.stats.percentile | pct }}</td>
+    <td>
+      {% if e.stats.price_percentile is not none %}
+        {% if e.stats.price_percentile_5y is not none and e.stats.price_percentile_5y != e.stats.price_percentile %}
+          {{ e.stats.price_percentile_5y | pct }}/{{ e.stats.price_percentile | pct }}
+        {% else %}{{ e.stats.price_percentile | pct }}{% endif %}
+      {% else %}-{% endif %}
+    </td>
+    <td>{{ '%.0f'|format(e.avgamount) if e.avgamount is not none else '-' }}</td>
+    <td><button class="watch-btn" data-code="{{ e.code }}">☆ 关注</button></td>
+  </tr>
+  {% endfor %}
+</table>
+
+<div class="pager">
+  {% if page > 1 %}<a href="{{ url_for('etfs', q=q, category=category, page=page-1) }}">上一页</a>{% endif %}
+  <span>第 {{ page }} / {{ pages }} 页</span>
+  {% if page < pages %}<a href="{{ url_for('etfs', q=q, category=category, page=page+1) }}">下一页</a>{% endif %}
+</div>
+{% else %}
+<p class="empty">没有匹配的 ETF。换个关键词试试，或 <a href="{{ url_for('etfs') }}">清空筛选</a>。</p>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='watch.js') }}?v=20260905"></script>
+{% endblock %}

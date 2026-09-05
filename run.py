@@ -9,9 +9,11 @@
     python run.py --etf-only     # 只刷新 ETF→指数映射（周日 cron 用）
     python run.py --pe-only      # 只更新估值
     python run.py --report-only  # 只生成报告并发邮件
+    python run.py --web          # 启动 Web 查询服务（默认 http://127.0.0.1:8000）
     # 单步手动执行（等价写法）：
     python -m src.pe             # 更新估值
     python -m src.main           # 生成报告并发邮件
+    python -m src.web            # 启动 Web 服务
 
 任一步骤失败即短路退出（exit 1），不发空邮件。
 ETF 映射已入库 anetf.db（etf 表），日常无需重跑映射刷新，周维度跑 --etf-only 即可。
@@ -43,6 +45,12 @@ def step_report():
     report.main()
 
 
+def step_web():
+    """启动 Web 查询服务（阻塞运行，Ctrl+C 退出）。"""
+    from src.web import __main__ as web
+    web.main()
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='ETF 海选每日编排：估值更新 → 报告邮件')
     parser.add_argument('--etf', action='store_true',
@@ -53,11 +61,18 @@ def parse_args():
                         help='只更新估值，不生成报告发邮件')
     parser.add_argument('--report-only', action='store_true',
                         help='只生成报告并发邮件（跳过估值更新）')
+    parser.add_argument('--web', action='store_true',
+                        help='启动 Web 查询服务（与其他步骤互斥）')
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+
+    if args.web:
+        # --web 独立模式：不参与每日编排链
+        step_web()
+        return
 
     steps = []
     if args.etf or args.etf_only:

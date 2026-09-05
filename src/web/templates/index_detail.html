@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}{{ detail.index_name if detail else '指数详情' }} - ETF 估值查询{% endblock %}
+{% block content %}
+{% if not detail %}
+<h2>指数未收录</h2>
+<p>数据库中没有指数 <code>{{ index_id }}</code> 的数据。<a href="{{ url_for('dashboard') }}">返回首页</a></p>
+{% else %}
+<h2>{{ detail.index_name }} <span class="mono">{{ detail.index_id }}</span></h2>
+
+<section class="cards">
+  <div class="card">
+    <div class="card-num">{{ detail.value | num }}</div>
+    <div class="card-label">当前{{ detail.value_type or '指标' }}</div>
+  </div>
+  <div class="card {{ 'low-card' if detail.percentile is not none and detail.percentile < 0.2 }}">
+    <div class="card-num">{{ detail.percentile | pct }}</div>
+    <div class="card-label">历史百分位</div>
+  </div>
+  <div class="card">
+    <div class="card-num">
+      {% if detail.price_percentile is not none and detail.price_percentile_5y is not none and detail.price_percentile_5y != detail.price_percentile %}
+        {{ detail.price_percentile_5y | pct }}/{{ detail.price_percentile | pct }}
+      {% else %}{{ detail.price_percentile | pct }}{% endif %}
+    </div>
+    <div class="card-label">行情百分位（近5年/总历史）</div>
+  </div>
+  <div class="card">
+    <div class="card-num">{{ detail.pe_rows }} / {{ detail.point_rows }}</div>
+    <div class="card-label">PE 行数 / 点位行数</div>
+  </div>
+</section>
+
+<h2>估值走势图</h2>
+{% if detail.pe_series or detail.point_series %}
+<p class="hint">左轴 PE（蓝线），右轴 点位（橙线），虚线为 PE 全历史分位；点击图例可显示/隐藏对应系列。</p>
+<div class="chart-box"><canvas id="combinedChart"></canvas></div>
+{% elif not detail.min_pe_rows_ok and not detail.point_series %}
+<p class="empty">PE 和点位历史数据均不足，不画图。</p>
+{% else %}
+<p class="empty">暂无 PE 和点位数据。</p>
+{% endif %}
+
+<h2>跟踪该指数的 ETF（{{ detail.etf_list | length }}）</h2>
+<table>
+  <tr>
+    <th>基金名称</th><th>基金代码</th><th>标签</th><th>日均成交(万)</th><th>操作</th>
+  </tr>
+  {% for e in detail.etf_list %}
+  <tr {% if loop.first %}class="low"{% endif %}>
+    <td class="text-left">{{ e.name }}{% if loop.first %} <span class="hint">（流动性最好）</span>{% endif %}</td>
+    <td>{{ e.code }}</td>
+    <td class="text-left tag-cell">{{ e.tag or '-' }}</td>
+    <td>{{ '%.0f'|format(e.avgamount) if e.avgamount is not none else '-' }}</td>
+    <td><button class="watch-btn" data-code="{{ e.code }}">☆ 关注</button></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if detail %}
+<script>
+window.PE_DATA = {{ detail.pe_series | tojson }};
+window.PE_BANDS = {{ detail.pe_bands | tojson }};
+window.POINT_DATA = {{ detail.point_series | tojson }};
+</script>
+<script src="{{ url_for('static', filename='charts.js') }}?v=20260906"></script>
+{% endif %}
+<script src="{{ url_for('static', filename='watch.js') }}?v=20260905"></script>
+{% endblock %}

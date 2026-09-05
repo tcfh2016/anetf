@@ -37,3 +37,13 @@ CREATE TABLE IF NOT EXISTS etf (
     index_id    TEXT,
     updated_at  TEXT
 );
+
+-- watchlist：Web 关注列表（Web 一期新增）
+-- alert_low/alert_high 为 PE 百分位预警阈值（0~1），一期仅页面可编辑保存，二期 cron 检查触发邮件
+CREATE TABLE IF NOT EXISTS watchlist (
+    code        TEXT PRIMARY KEY,
+    note        TEXT,
+    alert_low   REAL,
+    alert_high  REAL,
+    created_at  TEXT NOT NULL
+);

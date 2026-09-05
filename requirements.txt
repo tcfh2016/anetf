@@ -2,3 +2,4 @@ requests
 pandas
 akshare
 jinja2
+flask

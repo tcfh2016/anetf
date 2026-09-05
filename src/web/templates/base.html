@@ -1,0 +1,31 @@
+{# 基础骨架：导航栏 + 公共样式，沿用邮件报告配色（Brown 表头/绿低/红高） #}
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ETF 估值查询{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=20260906">
+  {# Chart.js 本地文件：国内网络 jsdelivr 不稳定，走本地 vendor（文件随仓库分发） #}
+  <script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}?v=20260906"></script>
+</head>
+<body>
+  <nav>
+    <span class="brand">ETF 估值查询</span>
+    <a href="{{ url_for('dashboard') }}" {% if request.path == '/' %}class="active"{% endif %}>首页</a>
+    <a href="{{ url_for('etfs') }}" {% if request.path == '/etfs' %}class="active"{% endif %}>ETF 列表</a>
+    <a href="{{ url_for('watchlist') }}" {% if request.path == '/watchlist' %}class="active"{% endif %}>关注列表</a>
+    <form class="navsearch" action="{{ url_for('etfs') }}" method="get">
+      <input type="search" name="q" placeholder="搜代码/名称/指数" value="{{ request.args.get('q', '') }}">
+      <button type="submit">搜索</button>
+    </form>
+  </nav>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    <p>数据来自每日更新的本地库（最新：{{ latest_date or '-' }}）；行情百分位为「近5年/总历史」双口径；以上信息仅供参考。</p>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
